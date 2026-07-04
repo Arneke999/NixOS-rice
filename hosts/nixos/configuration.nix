@@ -42,6 +42,18 @@
   #Enable SSH
   services.openssh.enable = true;
 
+  #Niri sesison
+  programs.niri.enable = true;
+
+  # Audio
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+  };
+
   # Enable the X11 windowing system.
   # services.xserver.enable = true;
 
@@ -71,7 +83,8 @@
      extraGroups = [ "wheel" "networkmanager" ]; # Enable ‘sudo’ for the user.
      hashedPassword = "REDACTED";
      packages = with pkgs; [
-       tree git
+       tree 
+       git
      ];
    };
 
@@ -79,10 +92,11 @@
 
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
-  # environment.systemPackages = with pkgs; [
-  #   vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #   wget
-  # ];
+  environment.systemPackages = with pkgs; [
+    vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    wget
+    kitty
+  ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
