@@ -17,12 +17,12 @@
 			modules = [
 				./hosts/nixos/configuration.nix
 				niri.nixosModules.niri
-				#home-manager.nixosModules.home-manager
-				#{
-					#home-manager.useGlobalPkgs = true;
-					#home-manager.useUserPackages = true;
-					#home-manager.users.lain = import ./home/home.nix;
-				#}
+				home-manager.nixosModules.home-manager
+				{
+					home-manager.useGlobalPkgs = true;
+					home-manager.useUserPackages = true;
+					home-manager.users.lain = import ./home/home.nix;
+				}
 			];
 		};
 	};
