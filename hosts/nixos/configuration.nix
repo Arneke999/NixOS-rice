@@ -44,6 +44,9 @@
 
   #Niri sesison
   programs.niri.enable = true;
+  
+  #Allow unfree packages
+  nixpkgs.config.allowUnfree = true;
 
   # Audio
   security.rtkit.enable = true;

@@ -4,7 +4,6 @@
   home.username = "lain";
   home.homeDirectory = "/home/lain";
   home.stateVersion = "26.05";   # <-- match system.stateVersion in configuration.nix
-  nixpkgs.config.allowUnfree = true;
   home.packages = with pkgs; [
     kitty
     matugen
