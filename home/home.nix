@@ -15,5 +15,9 @@
   ];
 
   # --- The rice: symlink raw dotfiles into ~/.config ---
-  xdg.configFile."niri/config.kdl".source = ../dotfiles/niri/config.kdl;
+  # Out-of-store symlink: points ~/.config/niri/config.kdl straight at the live
+  # repo file (not a read-only store copy), so edits hot-reload without a rebuild
+  # AND matugen can overwrite it at runtime. Absolute path required.
+  xdg.configFile."niri/config.kdl".source =
+    config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/niri/config.kdl";
 }
