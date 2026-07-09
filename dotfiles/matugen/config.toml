@@ -1,3 +1,5 @@
+[config]
+
 [templates.niri]
 input_path = "/home/lain/nix-config/dotfiles/niri/config.kdl.in"
 output_path = "/home/lain/nix-config/dotfiles/niri/config.kdl"
