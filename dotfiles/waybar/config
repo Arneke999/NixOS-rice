@@ -1,21 +1,57 @@
 {
     "layer": "top",
     "position": "top",
-    "height": 26,
-    "spacing": 0,
+    "height": 34,
+    "spacing": 4,
     "modules-left": ["niri/workspaces"],
-    "modules-center": ["niri/window"],
-    "modules-right": ["clock"],
+    "modules-center": ["clock"],
+    "modules-right": ["cpu", "custom/memory", "pulseaudio", "network", "battery", "clock#date"],
+
     "niri/workspaces": {
-        "format": "{index}"
-    },
-    "niri/window": {
-        "format": "{title}",
-        "max-length": 60,
-        "separate-outputs": true
+        "format": "{icon}",
+        "format-icons": {
+            "focused": "●",
+            "active": "●",
+            "urgent": "●",
+            "default": "●",
+            "empty": "○"
+        }
     },
     "clock": {
         "format": "{:%H:%M}",
         "tooltip-format": "<tt>{calendar}</tt>"
+    },
+    "clock#date": {
+        "format": "{:%a %d %b}"
+    },
+    "cpu": {
+        "format": "{icon}",
+        "format-icons": ["󰪞", "󰪟", "󰪠", "󰪡", "󰪢", "󰪣", "󰪤", "󰪥"],
+        "tooltip-format": "CPU {usage}%",
+        "interval": 2
+    },
+    "custom/memory": {
+        "exec": "~/nix-config/dotfiles/scripts/mem-pie.sh",
+        "return-type": "json",
+        "interval": 2
+    },
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-muted": " muted",
+        "format-icons": { "default": ["", "", ""] },
+        "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+        "scroll-step": 5
+    },
+    "network": {
+        "format-wifi": " {signalStrength}%",
+        "format-ethernet": " wired",
+        "format-disconnected": " off",
+        "tooltip-format": "{essid} {ipaddr}"
+    },
+    "battery": {
+        "format": "{icon} {capacity}%",
+        "format-charging": " {capacity}%",
+        "format-icons": ["", "", "", "", ""],
+        "states": { "warning": 30, "critical": 15 }
     }
 }
