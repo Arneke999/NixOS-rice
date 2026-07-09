@@ -3,3 +3,7 @@
 [templates.niri]
 input_path = "/home/lain/nix-config/dotfiles/niri/config.kdl.in"
 output_path = "/home/lain/nix-config/dotfiles/niri/config.kdl"
+
+[templates.waybar]
+input_path = "/home/lain/nix-config/dotfiles/waybar/style.css.in"
+output_path = "/home/lain/nix-config/dotfiles/waybar/style.css"

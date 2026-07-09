@@ -366,6 +366,9 @@ binds {
     Mod+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
 
+    // Re-theme from wallpaper.
+    Mod+Shift+W hotkey-overlay-title="Re-theme from wallpaper" { spawn-sh "~/nix-config/dotfiles/scripts/set-wallpaper.sh"; }
+
     // Use spawn-sh to run a shell command. Do this if you need pipes, multiple commands, etc.
     // Note: the entire command goes as a single argument. It's passed verbatim to `sh -c`.
     // For example, this is a standard bind to toggle the screen reader (orca).
