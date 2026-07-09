@@ -7,6 +7,11 @@
 
   home.packages = with pkgs; [
     kitty
+    matugen
+    swww
+    brave
+    claude-code
+    fastfetch
   ];
 
   # --- The rice: symlink raw dotfiles into ~/.config ---
