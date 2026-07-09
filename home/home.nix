@@ -11,6 +11,7 @@
     brave
     claude-code
     fastfetch
+    yazi
   ];
 
   # --- The rice: symlink raw dotfiles into ~/.config ---

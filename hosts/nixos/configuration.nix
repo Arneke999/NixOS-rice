@@ -92,12 +92,15 @@
    };
 
   # programs.firefox.enable = true;
+  
+  xdg.portal.config.common."org.freedesktop.impl.portal.FileChooser" = "gtk";
 
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
   environment.systemPackages = with pkgs; [
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     wget
+    xdg-user-dirs
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
