@@ -17,6 +17,7 @@
     fuzzel
     mako
     neovim
+    libnotify
   ];
 
   fonts.fontconfig.enable = true;
