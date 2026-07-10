@@ -35,4 +35,7 @@
 
   xdg.configFile."fuzzel/fuzzel.ini".source =
     config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/fuzzel/fuzzel.ini";
+
+  xdg.configFile."mako/config".source =
+    config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/mako/config";
 }

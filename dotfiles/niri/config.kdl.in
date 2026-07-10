@@ -244,6 +244,9 @@ layout {
 // This line starts waybar, a commonly used bar for Wayland compositors.
 spawn-at-startup "waybar"
 
+// Notification daemon.
+spawn-at-startup "mako"
+
 // Set the wallpaper and re-theme from it on login.
 spawn-sh-at-startup "~/nix-config/dotfiles/scripts/set-wallpaper.sh"
 

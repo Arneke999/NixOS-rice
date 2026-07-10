@@ -9,14 +9,16 @@ inner-pad=10
 
 [colors]
 background=0f0f11f2
-text=c8c8ceff
-prompt=8a8a90ff
+text={{colors.on_surface.default.hex_stripped}}ff
+prompt={{colors.tertiary.default.hex_stripped}}ff
+placeholder=8a8a90ff
 input=c8c8ceff
 match={{colors.primary.default.hex_stripped}}ff
-selection=1e1e22ff
+selection={{colors.primary.default.hex_stripped}}26
 selection-text=e8e8eeff
 selection-match={{colors.primary.default.hex_stripped}}ff
-border=1e1e22ff
+counter=8a8a90ff
+border={{colors.secondary.default.hex_stripped}}ff
 
 [border]
 width=1
