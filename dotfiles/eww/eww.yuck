@@ -1,0 +1,46 @@
+;; ── data ─────────────────────────────────────────────────────────
+(defpoll time     :interval "10s" `date +%H:%M`)
+(defpoll date_str :interval "1h"  `date "+%a %d %b"`)
+(defpoll volume   :interval "1s"  "~/nix-config/dotfiles/eww/scripts/volume.sh")
+(defpoll net      :interval "5s"  "~/nix-config/dotfiles/eww/scripts/net.sh")
+(deflisten workspaces :initial "[]" "~/nix-config/dotfiles/eww/scripts/workspaces.sh")
+
+;; ── widgets ──────────────────────────────────────────────────────
+(defwidget workspaces []
+  (box :class "pill ws" :space-evenly false :spacing 3
+    (for ws in workspaces
+      (label :class {ws.is_focused ? "ws-dot focused" : ws.is_active ? "ws-dot active" : "ws-dot empty"}
+             :text {ws.is_active ? "●" : "○"}))))
+
+(defwidget clock []
+  (box :class "pill clock"
+    (label :text time)))
+
+(defwidget pie [perc]
+  (label :class "pie"
+    :text {perc < 12.5 ? "󰪞" :
+           perc < 25   ? "󰪟" :
+           perc < 37.5 ? "󰪠" :
+           perc < 50   ? "󰪡" :
+           perc < 62.5 ? "󰪢" :
+           perc < 75   ? "󰪣" :
+           perc < 87.5 ? "󰪤" : "󰪥"}))
+
+(defwidget metrics []
+  (box :class "pill metrics" :space-evenly false :spacing 8
+    (pie :perc {EWW_CPU.avg})
+    (pie :perc {EWW_RAM.used_mem_perc})
+    (label :class "vol" :text {volume == "muted" ? " muted" : " ${volume}%"})
+    (label :class "net" :text net)
+    (label :class "date" :text date_str)))
+
+;; ── bar ──────────────────────────────────────────────────────────
+(defwindow bar
+  :monitor 0
+  :geometry (geometry :x "0" :y "0" :width "100%" :height "34px" :anchor "top center")
+  :exclusive true
+  :stacking "fg"
+  (centerbox :class "bar"
+    (box :halign "start"  (workspaces))
+    (box :halign "center" (clock))
+    (box :halign "end"    (metrics))))

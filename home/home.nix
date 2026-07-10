@@ -18,6 +18,8 @@
     mako
     neovim
     libnotify
+    eww
+    jq
   ];
 
   fonts.fontconfig.enable = true;
@@ -39,4 +41,9 @@
 
   xdg.configFile."mako/config".source =
     config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/mako/config";
+
+  xdg.configFile."eww/eww.yuck".source =
+    config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/eww/eww.yuck";
+  xdg.configFile."eww/eww.scss".source =
+    config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/eww/eww.scss";
 }

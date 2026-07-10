@@ -1,0 +1,34 @@
+* {
+  all: unset;
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 12px;
+}
+
+.bar {
+  background-color: transparent;
+  padding: 6px 8px;
+}
+
+.pill {
+  background-color: #0f0f11;
+  border: 1px solid #1e1e22;
+  border-radius: 14px;
+  padding: 0 10px;
+  margin: 0 4px;
+}
+
+.ws-dot {
+  font-size: 9px;
+  padding: 0 2px;
+  color: #55555b;
+}
+.ws-dot.empty   { color: #3a3a40; }
+.ws-dot.focused { color: #ffb2b9; }
+
+.clock label { color: #ffb2b9; }
+
+.metrics label { padding: 0 6px; }
+.pie  { color: #e8c08e; }
+.vol,
+.net  { color: #e5bdbf; }
+.date { color: #8a8a90; }
