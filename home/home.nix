@@ -55,4 +55,8 @@
     config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/gtk/settings.ini";
   xdg.configFile."gtk-4.0/settings.ini".source =
     config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/gtk/settings.ini";
+  xdg.configFile."gtk-3.0/gtk.css".source =
+    config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/gtk/gtk.css";
+  xdg.configFile."gtk-4.0/gtk.css".source =
+    config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/gtk/gtk.css";
 }
