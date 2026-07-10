@@ -14,6 +14,8 @@
     yazi
     waybar
     nerd-fonts.jetbrains-mono
+    fuzzel
+    mako
   ];
 
   fonts.fontconfig.enable = true;
@@ -26,4 +28,7 @@
     config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/waybar/config";
   xdg.configFile."waybar/style.css".source =
     config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/waybar/style.css";
+
+  xdg.configFile."kitty/kitty.conf".source =
+    config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/kitty/kitty.conf";
 }

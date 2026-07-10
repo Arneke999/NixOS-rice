@@ -52,6 +52,8 @@
         "format": "{icon} {capacity}%",
         "format-charging": " {capacity}%",
         "format-icons": ["", "", "", "", ""],
+        "tooltip-format": "{capacity}%  ·  {time}",
+        "tooltip-format-charging": "{capacity}%  ·  {time} to full",
         "states": { "warning": 30, "critical": 15 }
     }
 }

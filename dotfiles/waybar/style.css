@@ -52,6 +52,16 @@ window#waybar {
     color: #ffb2b9;
 }
 
+#cpu,
+#custom-memory {
+    color: #e8c08e;
+}
+
+#pulseaudio,
+#network {
+    color: #e5bdbf;
+}
+
 #battery.warning {
     color: #e8c08e;
 }
