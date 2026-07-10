@@ -1,8 +1,11 @@
 ;; ── data ─────────────────────────────────────────────────────────
 (defpoll time     :interval "10s" `date +%H:%M`)
 (defpoll date_str :interval "1h"  `date "+%a %d %b"`)
-(defpoll volume   :interval "1s"  "~/nix-config/dotfiles/eww/scripts/volume.sh")
-(defpoll net      :interval "5s"  "~/nix-config/dotfiles/eww/scripts/net.sh")
+(defpoll volume     :interval "1s"  "~/nix-config/dotfiles/eww/scripts/volume.sh")
+(defpoll net        :interval "5s"  "~/nix-config/dotfiles/eww/scripts/net.sh")
+(defpoll battery    :interval "10s" "~/nix-config/dotfiles/eww/scripts/battery.sh")
+(defpoll brightness :interval "3s"  "~/nix-config/dotfiles/eww/scripts/brightness.sh")
+(defpoll bluetooth  :interval "5s"  "~/nix-config/dotfiles/eww/scripts/bluetooth.sh")
 (deflisten workspaces :initial "[]" "~/nix-config/dotfiles/eww/scripts/workspaces.sh")
 
 ;; ── widgets ──────────────────────────────────────────────────────
@@ -16,23 +19,43 @@
   (box :class "pill clock"
     (label :text time)))
 
-(defwidget pie [perc]
-  (label :class "pie"
-    :text {perc < 12.5 ? "󰪞" :
-           perc < 25   ? "󰪟" :
-           perc < 37.5 ? "󰪠" :
-           perc < 50   ? "󰪡" :
-           perc < 62.5 ? "󰪢" :
-           perc < 75   ? "󰪣" :
-           perc < 87.5 ? "󰪤" : "󰪥"}))
+(defwidget ring [value cls icon]
+  (circular-progress :class "ring ${cls}" :value value :thickness 3 :start-at 75 :clockwise true
+    (label :class "ring-icon" :text icon)))
 
 (defwidget metrics []
   (box :class "pill metrics" :space-evenly false :spacing 8
-    (pie :perc {EWW_CPU.avg})
-    (pie :perc {EWW_RAM.used_mem_perc})
-    (label :class "vol" :text {volume == "muted" ? " muted" : " ${volume}%"})
-    (label :class "net" :text net)
-    (label :class "date" :text date_str)))
+    (ring :value {EWW_CPU.avg}            :cls "cpu" :icon "")
+    (ring :value {EWW_RAM.used_mem_perc}  :cls "ram" :icon "")
+
+    (eventbox :class "bri-box" :visible {brightness.present}
+              :onscroll "[ {} = up ] && brightnessctl set 5%+ || brightnessctl set 5%-"
+      (label :class "bri" :text "󰃟 ${brightness.value}%"))
+
+    (eventbox :class "vol-box"
+              :onscroll "[ {} = up ] && wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+ || wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
+              :onclick "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+      (label :class "vol"
+        :text {volume == "muted" ? "󰝟" :
+               volume < 34       ? "󰕿 ${volume}%" :
+               volume < 67       ? "󰖀 ${volume}%" :
+                                   "󰕾 ${volume}%"}))
+
+    (label :class "net"  :text net)
+
+    (eventbox :class "bt-box" :visible {bluetooth.present}
+              :onclick "~/nix-config/dotfiles/eww/scripts/bt-toggle.sh"
+      (label :class {bluetooth.connected ? "bt connected" : bluetooth.powered ? "bt on" : "bt off"}
+             :text {bluetooth.connected ? "󰂱" : bluetooth.powered ? "󰂯" : "󰂲"}))
+
+    (box :class "bat-box" :visible {battery.present}
+      (circular-progress :class {battery.status == "Charging" ? "ring bat charging" :
+                                 battery.capacity <= 15    ? "ring bat low" : "ring bat"}
+                         :value {battery.capacity} :thickness 3 :start-at 75 :clockwise true
+        (label :class "ring-icon" :text {battery.status == "Charging" ? "󰂄" : "󰁹"})))
+
+    (eventbox :class "date-box" :onclick "eww open --toggle calendar"
+      (label :class "date" :text date_str))))
 
 ;; ── bar ──────────────────────────────────────────────────────────
 (defwindow bar
@@ -44,3 +67,10 @@
     (box :halign "start"  (workspaces))
     (box :halign "center" (clock))
     (box :halign "end"    (metrics))))
+
+(defwindow calendar
+  :monitor 0
+  :geometry (geometry :y "6px" :x "8px" :anchor "top right" :width "260px")
+  :stacking "fg"
+  (box :class "pill cal-pop"
+    (calendar :class "cal")))

@@ -48,6 +48,10 @@
   #Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
+  # Bluetooth (provides bluetoothctl; eww bar has a toggle widget).
+  hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true;
+
   # Audio
   security.rtkit.enable = true;
   services.pipewire = {
@@ -101,6 +105,7 @@
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     wget
     xdg-user-dirs
+    bluez # bluetoothctl for the eww bluetooth widget
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

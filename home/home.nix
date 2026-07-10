@@ -20,6 +20,7 @@
     libnotify
     eww
     jq
+    brightnessctl
   ];
 
   fonts.fontconfig.enable = true;

@@ -28,7 +28,33 @@
 .clock label { color: #ffb2b9; }
 
 .metrics label { padding: 0 6px; }
-.pie  { color: #e8c08e; }
+
+.ring {
+  min-width: 20px;
+  min-height: 20px;
+  margin: 0 3px;
+  background-color: #2a2a30;
+}
+.ring.cpu { color: #ffb2b9; }
+.ring.ram { color: #e8c08e; }
+.ring.bat { color: #e5bdbf; }
+.ring.bat.charging { color: #7fd6a0; }
+.ring.bat.low { color: #ff5555; }
+.ring-icon { font-size: 8px; color: #8a8a90; }
+
 .vol,
-.net  { color: #e5bdbf; }
-.date { color: #8a8a90; }
+.net,
+.bri,
+.date { color: #e5bdbf; }
+
+.bt { color: #8a8a90; }
+.bt.on { color: #e5bdbf; }
+.bt.connected { color: #ffb2b9; }
+
+.cal-pop { padding: 10px; }
+.cal-pop calendar {
+  color: #c8c8ce;
+  padding: 4px;
+}
+.cal-pop calendar:selected { color: #ffb2b9; }
+.cal-pop calendar.header { color: #ffb2b9; }
