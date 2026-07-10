@@ -16,7 +16,7 @@
     nerd-fonts.jetbrains-mono
     fuzzel
     mako
-    nvim
+    neovim
   ];
 
   fonts.fontconfig.enable = true;
