@@ -16,6 +16,7 @@
     nerd-fonts.jetbrains-mono
     fuzzel
     mako
+    nvim
   ];
 
   fonts.fontconfig.enable = true;
@@ -31,4 +32,7 @@
 
   xdg.configFile."kitty/kitty.conf".source =
     config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/kitty/kitty.conf";
+
+  xdg.configFile."fuzzel/fuzzel.ini".source =
+    config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/fuzzel/fuzzel.ini";
 }
