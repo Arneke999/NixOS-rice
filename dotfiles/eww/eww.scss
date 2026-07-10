@@ -1,7 +1,7 @@
 * {
   all: unset;
   font-family: "JetBrainsMono Nerd Font";
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .bar {
@@ -18,7 +18,7 @@
 }
 
 .ws-dot {
-  font-size: 9px;
+  font-size: 11px;
   padding: 0 2px;
   color: #55555b;
 }
@@ -30,8 +30,8 @@
 .metrics label { padding: 0 6px; }
 
 .ring {
-  min-width: 20px;
-  min-height: 20px;
+  min-width: 24px;
+  min-height: 24px;
   margin: 0 3px;
   background-color: #2a2a30;
 }
@@ -40,7 +40,7 @@
 .ring.bat { color: #e5bdbf; }
 .ring.bat.charging { color: #7fd6a0; }
 .ring.bat.low { color: #ff5555; }
-.ring-icon { font-size: 8px; color: #8a8a90; }
+.ring-icon { font-size: 9px; color: #8a8a90; }
 
 .vol,
 .net,
@@ -50,6 +50,16 @@
 .bt { color: #8a8a90; }
 .bt.on { color: #e5bdbf; }
 .bt.connected { color: #ffb2b9; }
+
+tooltip {
+  background-color: #0f0f11;
+  border: 1px solid #1e1e22;
+  border-radius: 10px;
+}
+tooltip label {
+  color: #c8c8ce;
+  padding: 4px 8px;
+}
 
 .cal-pop { padding: 10px; }
 .cal-pop calendar {

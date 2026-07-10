@@ -241,11 +241,14 @@ layout {
 // which may be more convenient to use.
 // See the binds section below for more spawn examples.
 
-// This line starts waybar, a commonly used bar for Wayland compositors.
-spawn-at-startup "waybar"
+// Bar (eww).
+spawn-sh-at-startup "eww open bar"
 
 // Notification daemon.
 spawn-at-startup "mako"
+
+// Apply dark GTK / libadwaita theme prefs (dconf).
+spawn-sh-at-startup "~/nix-config/dotfiles/scripts/gtk-theme.sh"
 
 // Set the wallpaper and re-theme from it on login.
 spawn-sh-at-startup "~/nix-config/dotfiles/scripts/set-wallpaper.sh"

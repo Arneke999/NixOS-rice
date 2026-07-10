@@ -12,27 +12,30 @@
     claude-code
     fastfetch
     yazi
-    waybar
     nerd-fonts.jetbrains-mono
     fuzzel
     mako
-    neovim
-    libnotify
     eww
     jq
     brightnessctl
+    neovim
+    libnotify
+    adw-gtk3
+    papirus-icon-theme
+    bibata-cursors
+    inter
   ];
 
   fonts.fontconfig.enable = true;
 
+  home.sessionVariables = {
+    XCURSOR_THEME = "Bibata-Modern-Classic";
+    XCURSOR_SIZE = "24";
+  };
+
   # Out-of-store symlinks: live repo files (hot-reload + matugen can write them).
   xdg.configFile."niri/config.kdl".source =
     config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/niri/config.kdl";
-
-  xdg.configFile."waybar/config".source =
-    config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/waybar/config";
-  xdg.configFile."waybar/style.css".source =
-    config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/waybar/style.css";
 
   xdg.configFile."kitty/kitty.conf".source =
     config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/kitty/kitty.conf";
@@ -47,4 +50,9 @@
     config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/eww/eww.yuck";
   xdg.configFile."eww/eww.scss".source =
     config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/eww/eww.scss";
+
+  xdg.configFile."gtk-3.0/settings.ini".source =
+    config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/gtk/settings.ini";
+  xdg.configFile."gtk-4.0/settings.ini".source =
+    config.lib.file.mkOutOfStoreSymlink "/home/lain/nix-config/dotfiles/gtk/settings.ini";
 }

@@ -15,5 +15,5 @@ fi
 awww img "$WALL" --resize crop
 matugen image "$WALL" --prefer saturation --mode dark -c "$REPO/dotfiles/matugen/config.toml"
 
-pgrep -x waybar >/dev/null 2>&1 && pkill -SIGUSR2 waybar || true
-pgrep -x mako   >/dev/null 2>&1 && makoctl reload        || true
+eww reload >/dev/null 2>&1 || true
+makoctl reload >/dev/null 2>&1 || true

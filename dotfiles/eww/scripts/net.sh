@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Reactive network status: wifi glyph by signal, wired, or off.
+# Network status as JSON: glyph only for the bar, detail for the tooltip.
 state=$(nmcli -t -f TYPE,STATE dev status 2>/dev/null | awk -F: '$2=="connected"{print $1; exit}')
 case "$state" in
   wifi)
@@ -10,8 +10,8 @@ case "$state" in
     elif (( sig >= 30 )); then icon="󰤢"
     elif (( sig >=  5 )); then icon="󰤟"
     else                       icon="󰤯"; fi
-    echo "$icon ${sig}%"
+    printf '{"icon":"%s","detail":"wifi %s%%"}\n' "$icon" "$sig"
     ;;
-  ethernet) echo "󰈀 wired" ;;
-  *)        echo "󰤭 off" ;;
+  ethernet) printf '{"icon":"󰈀","detail":"wired"}\n' ;;
+  *)        printf '{"icon":"󰤭","detail":"disconnected"}\n' ;;
 esac
