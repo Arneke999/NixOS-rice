@@ -10,10 +10,16 @@
 		niri.url = "github:sodiboo/niri-flake";
 		};
 	
-	outputs = { self, nixpkgs, home-manager, niri, ... }@inputs: {
+	outputs = { self, nixpkgs, home-manager, niri, ... }@inputs:
+	let
+		# ── Single source of truth ─────────────────────────────────────────
+		# Change this one line (or set it via install.sh) to rename the user.
+		# Everything else (home dir, symlinks, account) derives from it.
+		username = "lain";
+	in {
 		nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
 			system = "x86_64-linux";
-			specialArgs = { inherit inputs;};
+			specialArgs = { inherit inputs username; };
 			modules = [
 				./hosts/nixos/configuration.nix
 				niri.nixosModules.niri
@@ -21,7 +27,8 @@
 				{
 					home-manager.useGlobalPkgs = true;
 					home-manager.useUserPackages = true;
-					home-manager.users.lain = import ./home/home.nix;
+					home-manager.extraSpecialArgs = { inherit username; };
+					home-manager.users.${username} = import ./home/home.nix;
 				}
 			];
 		};

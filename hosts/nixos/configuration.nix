@@ -2,7 +2,7 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, username, ... }:
 
 {
   imports =
@@ -85,10 +85,13 @@
   # services.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.lain = {
+  users.users.${username} = {
      isNormalUser = true;
      extraGroups = [ "wheel" "networkmanager" ]; # Enable ‘sudo’ for the user.
-     hashedPassword = "REDACTED";
+     # Initial login password — only applied when the account is first created.
+     # Change it immediately after first login with `passwd`. Never commit a real
+     # password hash to a public repo (it can be brute-forced offline).
+     initialPassword = "changeme";
      packages = with pkgs; [
        tree 
        git

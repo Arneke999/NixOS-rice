@@ -1,0 +1,25 @@
+[config]
+
+# matugen needs ABSOLUTE paths and cannot read env vars, so the installer
+# (install.sh) substitutes @HOME@ with your real $HOME to produce config.toml.
+# Edit this template, not the generated config.toml.
+
+[templates.niri]
+input_path = "@HOME@/nix-config/dotfiles/niri/config.kdl.in"
+output_path = "@HOME@/nix-config/dotfiles/niri/config.kdl"
+
+[templates.fuzzel]
+input_path = "@HOME@/nix-config/dotfiles/fuzzel/fuzzel.ini.in"
+output_path = "@HOME@/nix-config/dotfiles/fuzzel/fuzzel.ini"
+
+[templates.mako]
+input_path = "@HOME@/nix-config/dotfiles/mako/config.in"
+output_path = "@HOME@/nix-config/dotfiles/mako/config"
+
+[templates.eww]
+input_path = "@HOME@/nix-config/dotfiles/eww/eww.scss.in"
+output_path = "@HOME@/nix-config/dotfiles/eww/eww.scss"
+
+[templates.gtk]
+input_path = "@HOME@/nix-config/dotfiles/gtk/gtk.css.in"
+output_path = "@HOME@/nix-config/dotfiles/gtk/gtk.css"
