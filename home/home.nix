@@ -26,10 +26,10 @@
     fd                    # telescope find-files
     gcc                   # compile treesitter parsers + fzf-native
     gnumake               # build telescope-fzf-native + LuaSnip jsregexp
-    # Shell (zsh) + interactive tooling:
+    # Shell (zsh) + interactive tooling. Note: zsh-autosuggestions and
+    # zsh-syntax-highlighting are provided by programs.zsh.* in configuration.nix
+    # (loaded via /etc/zshrc), so they're not listed here.
     zsh
-    zsh-autosuggestions
-    zsh-syntax-highlighting
     starship              # prompt (matugen-themed)
     fzf                   # Ctrl-R history / Ctrl-T files
     eza                   # modern ls

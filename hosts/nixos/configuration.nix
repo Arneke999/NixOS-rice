@@ -48,6 +48,11 @@
   # Zsh as the login shell (adds it to /etc/shells, sets up /etc/zshrc).
   # The actual interactive config is the raw ~/.zshrc symlinked by Home Manager.
   programs.zsh.enable = true;
+  # Load these via /etc/zshrc with the correct store paths (nixpkgs packages them
+  # inconsistently, so path-probing in ~/.zshrc is unreliable on NixOS). The
+  # ~/.zshrc keeps a guarded fallback that sources them on Arch.
+  programs.zsh.autosuggestions.enable = true;
+  programs.zsh.syntaxHighlighting.enable = true;
   
   #Allow unfree packages
   nixpkgs.config.allowUnfree = true;

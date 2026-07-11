@@ -1,7 +1,13 @@
 # Starship prompt — themed from matugen (generated from starship.toml.in).
+# Style: lean/Pure (à la zenities) — single line, no icons, no filler words,
+# subtle grey git, coloured ❯. Command time is right-aligned.
 "$schema" = 'https://starship.rs/config-schema.json'
 add_newline = true
 palette = "wallpaper"
+# NOTE: format/right_format MUST stay above the first [table] header, or TOML
+# folds them into that table and starship silently falls back to its default.
+format = "$directory$git_branch$git_status$character"
+right_format = "$cmd_duration"
 
 [palettes.wallpaper]
 primary   = "{{colors.primary.default.hex}}"
@@ -11,31 +17,40 @@ error     = "{{colors.error.default.hex}}"
 muted     = "{{colors.outline.default.hex}}"
 text      = "{{colors.on_surface.default.hex}}"
 
-format = """
-$directory$git_branch$git_status$cmd_duration
-$character"""
-
 [directory]
-style = "bold primary"
+format = "[$path]($style)[$read_only]($read_only_style) "
+style = "primary"
 truncation_length = 3
 truncate_to_repo = true
+truncation_symbol = ""
 read_only = " "
+read_only_style = "error"
 
 [git_branch]
-symbol = " "
-style = "tertiary"
-format = "on [$symbol$branch]($style) "
+format = "[$branch]($style) "
+symbol = ""
+style = "muted"
 
 [git_status]
-style = "error"
-format = '([$all_status$ahead_behind]($style) )'
+format = "[$all_status$ahead_behind]($style) "
+style = "muted"
+conflicted = "="
+untracked = "?"
+modified = "*"
+staged = "+"
+renamed = "»"
+deleted = "✘"
+stashed = "≡"
+ahead = "⇡"
+behind = "⇣"
+diverged = "⇕"
 
 [cmd_duration]
 min_time = 500
 style = "muted"
-format = "took [$duration]($style) "
+format = "[ $duration]($style)"
 
 [character]
-success_symbol = "[❯](bold primary)"
-error_symbol = "[❯](bold error)"
-vimcmd_symbol = "[❮](bold secondary)"
+success_symbol = "[❯](primary)"
+error_symbol = "[❯](error)"
+vimcmd_symbol = "[❮](secondary)"

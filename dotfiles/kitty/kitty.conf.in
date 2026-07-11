@@ -19,6 +19,8 @@ cursor_blink_interval 0
 scrollback_lines      10000
 enable_audio_bell     no
 background_opacity     1.0
+# Remove the client-side titlebar/decorations (the gray bar niri/kitty draws on top).
+hide_window_decorations yes
 # Hide the tab bar entirely unless there are 2+ tabs (no ugly header on a single tab).
 tab_bar_min_tabs      2
 tab_bar_edge          bottom

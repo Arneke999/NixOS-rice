@@ -45,21 +45,23 @@ if command -v fzf >/dev/null; then
   export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border=rounded"
 fi
 
-# ── Autosuggestions (fish-style greyed type-ahead from history) ──────────────
+# ── Autosuggestions (fish-style greyed type-ahead) ───────────────────────────
+# On NixOS these load via /etc/zshrc (programs.zsh.autosuggestions). Only source
+# manually if not already active — e.g. on Arch.
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
-_src /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh \
-     /run/current-system/sw/share/zsh-autosuggestions/zsh-autosuggestions.zsh \
-     "/etc/profiles/per-user/${USER}/share/zsh-autosuggestions/zsh-autosuggestions.zsh" \
-     "$HOME/.nix-profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+if (( ! ${+functions[_zsh_autosuggest_start]} )); then
+  _src /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh \
+       /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
 
 # ── Prompt (Starship, themed from matugen) ───────────────────────────────────
 command -v starship >/dev/null && eval "$(starship init zsh)"
 
-# ── Greeting on new interactive shells ───────────────────────────────────────
-command -v fastfetch >/dev/null && fastfetch
+# ── fastfetch: run on demand with `ff` (no auto-greeting on every shell) ─────
+command -v fastfetch >/dev/null && alias ff='fastfetch'
 
-# ── Syntax highlighting MUST be sourced last ─────────────────────────────────
-_src /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh \
-     /run/current-system/sw/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh \
-     "/etc/profiles/per-user/${USER}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" \
-     "$HOME/.nix-profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+# ── Syntax highlighting (NixOS: via /etc/zshrc; else source last) ────────────
+if (( ! ${+functions[_zsh_highlight]} )); then
+  _src /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh \
+       /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
