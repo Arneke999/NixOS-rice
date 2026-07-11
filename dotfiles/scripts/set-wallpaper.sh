@@ -17,3 +17,7 @@ matugen image "$WALL" --prefer saturation --mode dark -c "$REPO/dotfiles/matugen
 
 eww reload >/dev/null 2>&1 || true
 makoctl reload >/dev/null 2>&1 || true
+# kitty reloads config on SIGUSR1. Match both the plain name (Arch) and the
+# NixOS wrapper name (.kitty-wrapped). kitty also auto-watches its config, so
+# this is mostly belt-and-suspenders.
+pkill -USR1 -x '\.?kitty(-wrapped)?' >/dev/null 2>&1 || true

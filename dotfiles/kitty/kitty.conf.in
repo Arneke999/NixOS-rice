@@ -26,20 +26,20 @@ tab_bar_style         powerline
 # Background is pinned near-black (rice's fixed-background rule); text and chrome
 # (cursor, selection, links, borders, tabs) track the wallpaper via matugen.
 background           #0f0f11
-foreground           #f0dedf
-selection_background #ffb2b9
+foreground           {{colors.on_surface.default.hex}}
+selection_background {{colors.primary.default.hex}}
 selection_foreground #0f0f11
-cursor               #ffb2b9
+cursor               {{colors.primary.default.hex}}
 cursor_text_color    #0f0f11
-url_color            #e8c08e
+url_color            {{colors.tertiary.default.hex}}
 
-active_border_color   #ffb2b9
+active_border_color   {{colors.primary.default.hex}}
 inactive_border_color #1e1e22
 
-active_tab_background   #ffb2b9
+active_tab_background   {{colors.primary.default.hex}}
 active_tab_foreground   #0f0f11
 inactive_tab_background #16161a
-inactive_tab_foreground #f0dedf
+inactive_tab_foreground {{colors.on_surface.default.hex}}
 
 # 16-color ANSI palette — kept fixed and correct so shell colors (ls, git diff,
 # prompts) stay readable. The wallpaper drives the chrome above, not these.

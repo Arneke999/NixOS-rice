@@ -23,3 +23,11 @@ output_path = "@HOME@/nix-config/dotfiles/eww/eww.scss"
 [templates.gtk]
 input_path = "@HOME@/nix-config/dotfiles/gtk/gtk.css.in"
 output_path = "@HOME@/nix-config/dotfiles/gtk/gtk.css"
+
+[templates.kitty]
+input_path = "@HOME@/nix-config/dotfiles/kitty/kitty.conf.in"
+output_path = "@HOME@/nix-config/dotfiles/kitty/kitty.conf"
+
+[templates.nvim]
+input_path = "@HOME@/nix-config/dotfiles/nvim/lua/matugen-colors.lua.in"
+output_path = "@HOME@/nix-config/dotfiles/nvim/lua/matugen-colors.lua"

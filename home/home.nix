@@ -19,6 +19,12 @@
     jq
     brightnessctl
     neovim
+    # Neovim tooling (installed via Nix, NOT mason — mason binaries break on NixOS):
+    lua-language-server   # lua_ls
+    nixd                  # Nix LSP
+    ripgrep               # telescope live-grep
+    fd                    # telescope find-files
+    gcc                   # compile treesitter parsers + fzf-native
     libnotify
     adw-gtk3
     papirus-icon-theme
@@ -59,4 +65,9 @@
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/gtk/gtk.css";
   xdg.configFile."gtk-4.0/gtk.css".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/gtk/gtk.css";
+
+  # Whole nvim dir symlinked live (raw Lua, portable to Arch). lazy.nvim installs
+  # plugins into ~/.local/share/nvim, and lazy-lock.json lands back in the repo.
+  xdg.configFile."nvim".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/nvim";
 }
