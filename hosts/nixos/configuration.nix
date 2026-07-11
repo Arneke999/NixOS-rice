@@ -44,6 +44,10 @@
 
   #Niri sesison
   programs.niri.enable = true;
+
+  # Zsh as the login shell (adds it to /etc/shells, sets up /etc/zshrc).
+  # The actual interactive config is the raw ~/.zshrc symlinked by Home Manager.
+  programs.zsh.enable = true;
   
   #Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -87,6 +91,7 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.${username} = {
      isNormalUser = true;
+     shell = pkgs.zsh;
      extraGroups = [ "wheel" "networkmanager" ]; # Enable ‘sudo’ for the user.
      # Login + sudo password. The HASH lives in a file OUTSIDE this repo
      # (root-only, /etc/nixos-secrets/password) so it never lands in the PUBLIC

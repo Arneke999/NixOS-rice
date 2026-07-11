@@ -27,3 +27,11 @@ output_path = "/home/lain/nix-config/dotfiles/kitty/kitty.conf"
 [templates.nvim]
 input_path = "/home/lain/nix-config/dotfiles/nvim/lua/matugen-colors.lua.in"
 output_path = "/home/lain/nix-config/dotfiles/nvim/lua/matugen-colors.lua"
+
+[templates.fastfetch]
+input_path = "/home/lain/nix-config/dotfiles/fastfetch/config.jsonc.in"
+output_path = "/home/lain/nix-config/dotfiles/fastfetch/config.jsonc"
+
+[templates.starship]
+input_path = "/home/lain/nix-config/dotfiles/starship/starship.toml.in"
+output_path = "/home/lain/nix-config/dotfiles/starship/starship.toml"

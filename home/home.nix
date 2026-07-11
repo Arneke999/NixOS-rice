@@ -26,6 +26,14 @@
     fd                    # telescope find-files
     gcc                   # compile treesitter parsers + fzf-native
     gnumake               # build telescope-fzf-native + LuaSnip jsregexp
+    # Shell (zsh) + interactive tooling:
+    zsh
+    zsh-autosuggestions
+    zsh-syntax-highlighting
+    starship              # prompt (matugen-themed)
+    fzf                   # Ctrl-R history / Ctrl-T files
+    eza                   # modern ls
+    bat                   # cat with syntax highlighting
     libnotify
     adw-gtk3
     papirus-icon-theme
@@ -66,6 +74,16 @@
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/gtk/gtk.css";
   xdg.configFile."gtk-4.0/gtk.css".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/gtk/gtk.css";
+
+  xdg.configFile."fastfetch/config.jsonc".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/fastfetch/config.jsonc";
+
+  home.file.".zshrc".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/zsh/.zshrc";
+  xdg.configFile."starship.toml".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/starship/starship.toml";
+  xdg.configFile."bat/config".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/bat/config";
 
   # Whole nvim dir symlinked live (raw Lua, portable to Arch). lazy.nvim installs
   # plugins into ~/.local/share/nvim, and lazy-lock.json lands back in the repo.

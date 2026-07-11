@@ -19,8 +19,11 @@ cursor_blink_interval 0
 scrollback_lines      10000
 enable_audio_bell     no
 background_opacity     1.0
-tab_bar_edge          top
+# Hide the tab bar entirely unless there are 2+ tabs (no ugly header on a single tab).
+tab_bar_min_tabs      2
+tab_bar_edge          bottom
 tab_bar_style         powerline
+tab_title_template    "{index}: {title}"
 
 # ── Colors ───────────────────────────────────────────────────────────────────
 # Background is pinned near-black (rice's fixed-background rule); text and chrome

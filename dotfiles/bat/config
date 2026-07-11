@@ -1,0 +1,4 @@
+# bat config. The "base16" theme renders via the terminal's 16 ANSI colours,
+# so bat stays consistent with kitty's palette.
+--theme="base16"
+--style="numbers,changes,header"

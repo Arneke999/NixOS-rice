@@ -1,0 +1,41 @@
+# Starship prompt — themed from matugen (generated from starship.toml.in).
+"$schema" = 'https://starship.rs/config-schema.json'
+add_newline = true
+palette = "wallpaper"
+
+[palettes.wallpaper]
+primary   = "#ffb2b9"
+secondary = "#e5bdbf"
+tertiary  = "#e8c08e"
+error     = "#ffb4ab"
+muted     = "#9f8c8d"
+text      = "#f0dedf"
+
+format = """
+$directory$git_branch$git_status$cmd_duration
+$character"""
+
+[directory]
+style = "bold primary"
+truncation_length = 3
+truncate_to_repo = true
+read_only = " "
+
+[git_branch]
+symbol = " "
+style = "tertiary"
+format = "on [$symbol$branch]($style) "
+
+[git_status]
+style = "error"
+format = '([$all_status$ahead_behind]($style) )'
+
+[cmd_duration]
+min_time = 500
+style = "muted"
+format = "took [$duration]($style) "
+
+[character]
+success_symbol = "[❯](bold primary)"
+error_symbol = "[❯](bold error)"
+vimcmd_symbol = "[❮](bold secondary)"
