@@ -53,6 +53,11 @@
   # ~/.zshrc keeps a guarded fallback that sources them on Arch.
   programs.zsh.autosuggestions.enable = true;
   programs.zsh.syntaxHighlighting.enable = true;
+
+  # Keep the sudo password cached for 15 min (default is 5) so you re-enter less.
+  security.sudo.extraConfig = ''
+    Defaults timestamp_timeout=15
+  '';
   
   #Allow unfree packages
   nixpkgs.config.allowUnfree = true;

@@ -1,7 +1,7 @@
 * {
   all: unset;
   font-family: "JetBrainsMono Nerd Font";
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .bar {
@@ -12,13 +12,13 @@
 .pill {
   background-color: #0f0f11;
   border: 1px solid #1e1e22;
-  border-radius: 14px;
-  padding: 0 10px;
+  border-radius: 16px;
+  padding: 0 12px;
   margin: 0 4px;
 }
 
 .ws-dot {
-  font-size: 11px;
+  font-size: 12px;
   padding: 0 2px;
   color: #55555b;
 }
@@ -30,9 +30,9 @@
 .metrics label { padding: 0 6px; }
 
 .ring {
-  min-width: 24px;
-  min-height: 24px;
-  margin: 0 3px;
+  min-width: 27px;
+  min-height: 27px;
+  margin: 0 4px;
   background-color: #2a2a30;
 }
 .ring.cpu { color: {{colors.primary.default.hex}}; }
@@ -40,7 +40,7 @@
 .ring.bat { color: {{colors.secondary.default.hex}}; }
 .ring.bat.charging { color: #7fd6a0; }
 .ring.bat.low { color: #ff5555; }
-.ring-icon { font-size: 9px; color: #8a8a90; }
+.ring-icon { font-size: 10px; color: #8a8a90; }
 
 .vol,
 .net,

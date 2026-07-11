@@ -279,6 +279,12 @@ screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 // Animation settings.
 // The wiki explains how to configure individual animations:
 // https://yalter.github.io/niri/Configuration:-Animations
+// Cursor size — niri's default (24) renders chunky with Bibata; 20 is a normal size.
+cursor {
+    xcursor-theme "Bibata-Modern-Classic"
+    xcursor-size 20
+}
+
 animations {
     // Deliberate, fluid motion (Lain: calm + precise, no cartoon bounce).
     // damping-ratio 1.0 = critically damped springs → smooth settle, no overshoot.

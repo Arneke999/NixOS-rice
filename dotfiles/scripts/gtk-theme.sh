@@ -4,7 +4,7 @@ dconf write /org/gnome/desktop/interface/color-scheme "'prefer-dark'"
 dconf write /org/gnome/desktop/interface/gtk-theme    "'adw-gtk3-dark'"
 dconf write /org/gnome/desktop/interface/icon-theme   "'Papirus-Dark'"
 dconf write /org/gnome/desktop/interface/cursor-theme "'Bibata-Modern-Classic'"
-dconf write /org/gnome/desktop/interface/cursor-size  24
+dconf write /org/gnome/desktop/interface/cursor-size  20
 
 # Extra polish for libadwaita apps (which ignore settings.ini): named pink
 # accent, app fonts, crisp text rendering. No-ops on pre-GNOME-47 libadwaita.

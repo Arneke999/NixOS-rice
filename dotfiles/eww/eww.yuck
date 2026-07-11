@@ -16,8 +16,9 @@
              :text {ws.is_active ? "●" : "○"}))))
 
 (defwidget clock []
-  (box :class "pill clock"
-    (label :text time)))
+  (eventbox :class "clock-box" :onclick "swaync-client -t -sw" :tooltip "Notifications"
+    (box :class "pill clock"
+      (label :text time))))
 
 (defwidget ring [value cls icon name]
   (eventbox :tooltip "${name}  ${round(value, 0)}%"
@@ -62,7 +63,7 @@
 ;; ── bar ──────────────────────────────────────────────────────────
 (defwindow bar
   :monitor 0
-  :geometry (geometry :x "0" :y "0" :width "100%" :height "40px" :anchor "top center")
+  :geometry (geometry :x "0" :y "0" :width "100%" :height "46px" :anchor "top center")
   :exclusive true
   :stacking "fg"
   (centerbox :class "bar"
