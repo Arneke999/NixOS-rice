@@ -88,10 +88,13 @@
   users.users.${username} = {
      isNormalUser = true;
      extraGroups = [ "wheel" "networkmanager" ]; # Enable ‘sudo’ for the user.
-     # Initial login password — only applied when the account is first created.
-     # Change it immediately after first login with `passwd`. Never commit a real
-     # password hash to a public repo (it can be brute-forced offline).
-     initialPassword = "changeme";
+     # Login + sudo password. The HASH lives in a file OUTSIDE this repo
+     # (root-only, /etc/nixos-secrets/password) so it never lands in the PUBLIC
+     # GitHub repo. Only this path is committed — the secret is not.
+     #   Create/rotate it with:  mkpasswd -m sha-512 | sudo tee /etc/nixos-secrets/password
+     #   (install.sh seeds it for a fresh clone.)
+     # NEVER use inline `hashedPassword = "$6$..."` here — that would leak it again.
+     hashedPasswordFile = "/etc/nixos-secrets/password";
      packages = with pkgs; [
        tree 
        git

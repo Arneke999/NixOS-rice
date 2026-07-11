@@ -37,18 +37,32 @@ sed "s|@HOME@|${HOME}|g" \
   > "$REPO_DIR/dotfiles/matugen/config.toml"
 echo "→ matugen/config.toml generated for HOME=${HOME}"
 
-# ── 3. Reminders the installer can't do for you ──────────────────────────────
+# ── 3. Password hash (kept OUTSIDE the repo/store) ───────────────────────────
+# configuration.nix reads the hash from this file. It must exist BEFORE the
+# first rebuild, or the account boots with no valid password. The file lives in
+# /etc (root-only, 0600) and is NEVER committed — only its path is.
+SECRET="/etc/nixos-secrets/password"
+if ! sudo test -f "$SECRET"; then
+  echo "Set your login/sudo password (hashed into ${SECRET}, not into git):"
+  HASH="$(nix-shell -p mkpasswd --run 'mkpasswd -m sha-512')"
+  sudo mkdir -p "$(dirname "$SECRET")"
+  echo "$HASH" | sudo tee "$SECRET" >/dev/null
+  sudo chmod 600 "$SECRET"
+  echo "→ wrote ${SECRET}"
+fi
+
+# ── 4. Reminders the installer can't do for you ──────────────────────────────
 cat <<EOF
 
 Almost done. Before / after the first build, remember:
-  • Set a real password:  passwd        (initialPassword is 'changeme')
+  • Rotate the password later:  mkpasswd -m sha-512 | sudo tee ${SECRET}  (then rebuild)
   • Drop your own wallpaper at ~/nix-config/wallpapers/lain.jpg (or edit the path)
   • hardware-configuration.nix is machine-specific — keep YOUR generated one
   • Review host bits in hosts/nixos/configuration.nix: hostName, timeZone
 
 EOF
 
-# ── 4. Build ─────────────────────────────────────────────────────────────────
+# ── 5. Build ─────────────────────────────────────────────────────────────────
 read -rp "Run 'sudo nixos-rebuild switch --flake ~/nix-config#nixos' now? [y/N] " GO
 if [[ "$GO" =~ ^[Yy]$ ]]; then
   sudo nixos-rebuild switch --flake "$EXPECTED#nixos"
