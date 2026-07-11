@@ -8,9 +8,9 @@ output_path = "/home/lain/nix-config/dotfiles/niri/config.kdl"
 input_path = "/home/lain/nix-config/dotfiles/fuzzel/fuzzel.ini.in"
 output_path = "/home/lain/nix-config/dotfiles/fuzzel/fuzzel.ini"
 
-[templates.mako]
-input_path = "/home/lain/nix-config/dotfiles/mako/config.in"
-output_path = "/home/lain/nix-config/dotfiles/mako/config"
+[templates.swaync]
+input_path = "/home/lain/nix-config/dotfiles/swaync/style.css.in"
+output_path = "/home/lain/nix-config/dotfiles/swaync/style.css"
 
 [templates.eww]
 input_path = "/home/lain/nix-config/dotfiles/eww/eww.scss.in"

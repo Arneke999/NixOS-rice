@@ -65,3 +65,11 @@ if (( ! ${+functions[_zsh_highlight]} )); then
   _src /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh \
        /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
+
+# Drop the green "valid command" / red "invalid" coloring — keep typing neutral.
+# (Quoted strings, brackets, etc. stay subtly highlighted.)
+typeset -gA ZSH_HIGHLIGHT_STYLES
+for _k in command builtin alias function precommand hashed-command unknown-token; do
+  ZSH_HIGHLIGHT_STYLES[$_k]='none'
+done
+unset _k

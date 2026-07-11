@@ -14,10 +14,10 @@
     yazi
     nerd-fonts.jetbrains-mono
     fuzzel
-    mako
     eww
     jq
     brightnessctl
+    swaynotificationcenter   # swaync — animated notifications + notification center
     neovim
     # Neovim tooling (installed via Nix, NOT mason — mason binaries break on NixOS):
     lua-language-server   # lua_ls
@@ -58,8 +58,10 @@
   xdg.configFile."fuzzel/fuzzel.ini".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/fuzzel/fuzzel.ini";
 
-  xdg.configFile."mako/config".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/mako/config";
+  xdg.configFile."swaync/config.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/swaync/config.json";
+  xdg.configFile."swaync/style.css".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/swaync/style.css";
 
   xdg.configFile."eww/eww.yuck".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/eww/eww.yuck";

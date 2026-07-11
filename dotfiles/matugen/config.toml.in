@@ -12,9 +12,9 @@ output_path = "@HOME@/nix-config/dotfiles/niri/config.kdl"
 input_path = "@HOME@/nix-config/dotfiles/fuzzel/fuzzel.ini.in"
 output_path = "@HOME@/nix-config/dotfiles/fuzzel/fuzzel.ini"
 
-[templates.mako]
-input_path = "@HOME@/nix-config/dotfiles/mako/config.in"
-output_path = "@HOME@/nix-config/dotfiles/mako/config"
+[templates.swaync]
+input_path = "@HOME@/nix-config/dotfiles/swaync/style.css.in"
+output_path = "@HOME@/nix-config/dotfiles/swaync/style.css"
 
 [templates.eww]
 input_path = "@HOME@/nix-config/dotfiles/eww/eww.scss.in"
