@@ -4,7 +4,7 @@
 local opt = vim.opt
 
 opt.number = true
-opt.relativenumber = true
+opt.relativenumber = false
 opt.mouse = "a"
 opt.showmode = false          -- lualine already shows the mode
 opt.clipboard = "unnamedplus" -- share the system clipboard (wl-clipboard on Wayland)

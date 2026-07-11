@@ -30,25 +30,21 @@ return {
       end,
     })
 
+    -- nvim 0.11 API: nvim-lspconfig ships the base config (cmd/filetypes/roots)
+    -- for each server; we layer capabilities + per-server settings on top and
+    -- enable them. The servers must be on PATH (installed via Nix, not mason).
     local capabilities = require("cmp_nvim_lsp").default_capabilities()
+    vim.lsp.config("*", { capabilities = capabilities })
 
-    -- Servers to enable IF their binary is on PATH.
-    local servers = {
-      lua_ls = {
-        settings = {
-          Lua = {
-            completion = { callSnippet = "Replace" },
-            diagnostics = { globals = { "vim" } },
-          },
+    vim.lsp.config("lua_ls", {
+      settings = {
+        Lua = {
+          completion = { callSnippet = "Replace" },
+          diagnostics = { globals = { "vim" } },
         },
       },
-      nixd = {}, -- Nix language server
-    }
+    })
 
-    local lspconfig = require("lspconfig")
-    for name, opts in pairs(servers) do
-      opts.capabilities = capabilities
-      lspconfig[name].setup(opts)
-    end
+    vim.lsp.enable({ "lua_ls", "nixd" })
   end,
 }

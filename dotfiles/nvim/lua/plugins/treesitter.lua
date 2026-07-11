@@ -2,6 +2,9 @@
 -- Parsers compile on install; requires a C compiler (gcc, provided via Nix).
 return {
   "nvim-treesitter/nvim-treesitter",
+  -- Pin the stable `master` branch: the new default `main` branch is a rewrite
+  -- that removed `nvim-treesitter.configs` (the classic setup API used below).
+  branch = "master",
   build = ":TSUpdate",
   main = "nvim-treesitter.configs",
   opts = {
