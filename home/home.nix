@@ -25,6 +25,7 @@
     ripgrep               # telescope live-grep
     fd                    # telescope find-files
     gcc                   # compile treesitter parsers + fzf-native
+    gnumake               # build telescope-fzf-native + LuaSnip jsregexp
     libnotify
     adw-gtk3
     papirus-icon-theme
