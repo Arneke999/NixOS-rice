@@ -26,11 +26,12 @@ background {
     monitor =
     path = $HOME/.cache/wallpaper
     color = $void
-    blur_passes = 1
-    blur_size = 2
-    brightness = 0.42
-    contrast = 0.95
-    vibrancy = 0.10
+    blur_passes = 3
+    blur_size = 8
+    noise = 0.012
+    brightness = 0.40
+    contrast = 0.90
+    vibrancy = 0.14
 }
 
 # Clock — big, quiet.
@@ -48,7 +49,7 @@ label {
 # Wired motif.
 label {
     monitor =
-    text = present day,  present time   ]:->
+    text = present day,  present time   _
     color = $muted
     font_size = 15
     font_family = JetBrainsMono Nerd Font
@@ -69,9 +70,10 @@ input-field {
     outer_color = $accent
     inner_color = rgba(15, 15, 17, 0.85)
     font_color = $text
+    font_family = JetBrainsMono Nerd Font
     check_color = $accent
     fail_color = rgb(ff5555)
-    placeholder_text = <i>the Wired</i>
+    placeholder_text = the wired
     fade_on_empty = false
     position = 0, -40
     halign = center

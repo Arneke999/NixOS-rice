@@ -22,7 +22,7 @@ line_sprite.SetX(Window.GetWidth()  / 2 - line.GetWidth()  / 2);
 line_sprite.SetY(Window.GetHeight() / 2 - line.GetHeight() / 2);
 
 # --- blinking terminal cursor just below ---
-cursor = Image.Text("]:->", pink_r, pink_g, pink_b);
+cursor = Image.Text("_", pink_r, pink_g, pink_b);
 cursor_sprite = Sprite(cursor);
 cursor_sprite.SetX(Window.GetWidth()  / 2 - cursor.GetWidth() / 2);
 cursor_sprite.SetY(Window.GetHeight() / 2 + line.GetHeight());
