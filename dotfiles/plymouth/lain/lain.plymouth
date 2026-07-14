@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Lain
+Description=Serial Experiments Lain x Palantir — near-black boot splash
+ModuleName=script
+
+[script]
+ImageDir=@THEMEDIR@
+ScriptFile=@THEMEDIR@/lain.script

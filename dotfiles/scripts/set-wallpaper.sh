@@ -15,6 +15,11 @@ fi
 awww img "$WALL" --resize crop
 matugen image "$WALL" --prefer saturation --mode dark -c "$REPO/dotfiles/matugen/config.toml"
 
+# Keep a stable path for hyprlock's background so the lockscreen always matches
+# the live desktop wallpaper (hyprlock reads ~/.cache/wallpaper).
+mkdir -p "$HOME/.cache"
+ln -sf "$WALL" "$HOME/.cache/wallpaper"
+
 eww reload >/dev/null 2>&1 || true
 swaync-client --reload-css >/dev/null 2>&1 || true
 # kitty reloads config on SIGUSR1. Match both the plain name (Arch) and the

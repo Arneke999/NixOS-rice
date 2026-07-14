@@ -16,6 +16,10 @@ output_path = "@HOME@/nix-config/dotfiles/fuzzel/fuzzel.ini"
 input_path = "@HOME@/nix-config/dotfiles/swaync/style.css.in"
 output_path = "@HOME@/nix-config/dotfiles/swaync/style.css"
 
+[templates.hyprlock]
+input_path = "@HOME@/nix-config/dotfiles/hypr/hyprlock.conf.in"
+output_path = "@HOME@/nix-config/dotfiles/hypr/hyprlock.conf"
+
 [templates.eww]
 input_path = "@HOME@/nix-config/dotfiles/eww/eww.scss.in"
 output_path = "@HOME@/nix-config/dotfiles/eww/eww.scss"

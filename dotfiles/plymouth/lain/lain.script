@@ -1,0 +1,67 @@
+# Serial Experiments Lain x Palantir boot splash. Restrained by design: a
+# near-black void, one pink line, and a blinking terminal cursor so it feels
+# alive. The heavier CRT texture (scanlines/glow) lives on the hyprlock
+# lockscreen; boot stays minimal.
+#
+# The accent pink is fixed here (#ffb2b9) — boot happens before we know the
+# wallpaper, so it can't be matugen-dynamic. It matches matugen's pink bias.
+
+# --- near-black background (#0a0a0b) ---
+Window.SetBackgroundTopColor(0.039, 0.039, 0.043);
+Window.SetBackgroundBottomColor(0.039, 0.039, 0.043);
+
+# pink = #ffb2b9
+pink_r = 1.0;
+pink_g = 0.698;
+pink_b = 0.725;
+
+# --- the wired line, centered ---
+line = Image.Text("present day,  present time", pink_r, pink_g, pink_b);
+line_sprite = Sprite(line);
+line_sprite.SetX(Window.GetWidth()  / 2 - line.GetWidth()  / 2);
+line_sprite.SetY(Window.GetHeight() / 2 - line.GetHeight() / 2);
+
+# --- blinking terminal cursor just below ---
+cursor = Image.Text("]:->", pink_r, pink_g, pink_b);
+cursor_sprite = Sprite(cursor);
+cursor_sprite.SetX(Window.GetWidth()  / 2 - cursor.GetWidth() / 2);
+cursor_sprite.SetY(Window.GetHeight() / 2 + line.GetHeight());
+
+progress = 0;
+fun refresh_callback() {
+    progress++;
+    # ~1s blink (plymouth refreshes ~50x/s)
+    if (progress % 50 < 25)
+        cursor_sprite.SetOpacity(1);
+    else
+        cursor_sprite.SetOpacity(0.15);
+}
+Plymouth.SetRefreshFunction(refresh_callback);
+
+# Password prompts (e.g. LUKS) — quiet, in case a machine using this theme has
+# disk encryption. Shows the message centered under the line.
+message_sprite = Sprite();
+message_sprite.SetPosition(Window.GetWidth() / 2, Window.GetHeight() * 0.62, 10000);
+
+fun message_callback(text) {
+    msg = Image.Text(text, pink_r, pink_g, pink_b);
+    message_sprite.SetImage(msg);
+    message_sprite.SetX(Window.GetWidth() / 2 - msg.GetWidth() / 2);
+}
+Plymouth.SetMessageFunction(message_callback);
+
+fun display_password_callback(prompt, bullets) {
+    entry = "";
+    i = 0;
+    while (i < bullets) {
+        entry += "*";
+        i++;
+    }
+    message_callback(prompt + "  " + entry);
+}
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+
+fun display_normal_callback() {
+    message_callback("");
+}
+Plymouth.SetDisplayNormalFunction(display_normal_callback);

@@ -16,6 +16,30 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # Boot splash: the Lain theme (near-black + pink wired motif). Texture is kept
+  # restrained here; the heavier CRT look lives on the hyprlock lockscreen.
+  # The theme is a raw plymouth script in dotfiles/plymouth/lain, wrapped into a
+  # store package so NixOS can install it (its .plymouth ImageDir/ScriptFile need
+  # absolute store paths, sed'd in here). The boot MENU is left visible (default
+  # timeout) so rollback stays reachable.
+  boot.plymouth = {
+    enable = true;
+    theme = "lain";
+    themePackages = [
+      (pkgs.runCommand "lain-plymouth-theme" { } ''
+        dir=$out/share/plymouth/themes/lain
+        mkdir -p "$dir"
+        cp ${../../dotfiles/plymouth/lain}/lain.script "$dir/"
+        cp ${../../dotfiles/plymouth/lain}/lain.plymouth "$dir/"
+        substituteInPlace "$dir/lain.plymouth" --replace "@THEMEDIR@" "$dir"
+      '')
+    ];
+  };
+  # Quiet the kernel/initrd log spam so the splash reads clean.
+  boot.consoleLogLevel = 0;
+  boot.initrd.verbose = false;
+  boot.kernelParams = [ "quiet" "splash" "loglevel=3" "rd.udev.log_level=3" ];
+
   networking.hostName = "nixos"; # Define your hostname.
 
   # Configure network connections interactively with nmcli or nmtui.
@@ -58,6 +82,10 @@
   security.sudo.extraConfig = ''
     Defaults timestamp_timeout=15
   '';
+
+  # hyprlock authenticates via PAM — without this service it can't verify your
+  # password and you'd be stuck on the lockscreen (escape hatch: a TTY).
+  security.pam.services.hyprlock = { };
   
   #Allow unfree packages
   nixpkgs.config.allowUnfree = true;

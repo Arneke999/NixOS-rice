@@ -247,6 +247,9 @@ spawn-sh-at-startup "eww open bar"
 // Notification daemon (swaync: animated + notification center).
 spawn-at-startup "swaync"
 
+// Idle daemon: locks (hyprlock) after 5 min, DPMS-off shortly after.
+spawn-at-startup "hypridle"
+
 // Apply dark GTK / libadwaita theme prefs (dconf).
 spawn-sh-at-startup "~/nix-config/dotfiles/scripts/gtk-theme.sh"
 
@@ -376,7 +379,9 @@ binds {
     Alt+Space hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
     Mod+N hotkey-overlay-title="Notifications: swaync" { spawn "swaync-client" "-t" "-sw"; }
     Mod+Shift+N hotkey-overlay-title="Do Not Disturb: swaync" { spawn "swaync-client" "-d" "-sw"; }
-    Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
+    // Lock via logind so hypridle catches the signal and runs hyprlock (Niri
+    // gets the locked hint over dbus — see hypridle.conf for why).
+    Super+Alt+L hotkey-overlay-title="Lock the Screen: hyprlock" { spawn "loginctl" "lock-session"; }
 
     // Re-theme from wallpaper.
     Mod+Shift+W hotkey-overlay-title="Re-theme from wallpaper" { spawn-sh "~/nix-config/dotfiles/scripts/set-wallpaper.sh"; }

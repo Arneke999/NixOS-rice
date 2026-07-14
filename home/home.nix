@@ -18,6 +18,8 @@
     jq
     brightnessctl
     swaynotificationcenter   # swaync — animated notifications + notification center
+    hyprlock                 # the Lain lockscreen (CRT shader, pink input)
+    hypridle                 # idle -> lock (drives lock via logind for Niri)
     neovim
     # Neovim tooling (installed via Nix, NOT mason — mason binaries break on NixOS):
     lua-language-server   # lua_ls
@@ -62,6 +64,16 @@
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/swaync/config.json";
   xdg.configFile."swaync/style.css".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/swaync/style.css";
+
+  # hyprlock + hypridle (kept in dotfiles/hypr/ — hyprlock's default search path
+  # is ~/.config/hypr, so this is a straight copy to Arch). The .frag is the CRT
+  # shader (static); hyprlock.conf is matugen-generated from hyprlock.conf.in.
+  xdg.configFile."hypr/hyprlock.conf".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/hypr/hyprlock.conf";
+  xdg.configFile."hypr/hyprlock.frag".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/hypr/hyprlock.frag";
+  xdg.configFile."hypr/hypridle.conf".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/hypr/hypridle.conf";
 
   xdg.configFile."eww/eww.yuck".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/eww/eww.yuck";

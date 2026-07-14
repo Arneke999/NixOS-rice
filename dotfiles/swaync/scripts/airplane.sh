@@ -8,6 +8,7 @@ case "$1" in
       command -v bluetoothctl >/dev/null && timeout 2 bluetoothctl power off >/dev/null 2>&1
     else
       nmcli radio all on
+      command -v bluetoothctl >/dev/null && timeout 2 bluetoothctl power on >/dev/null 2>&1
     fi ;;
   status)
     [ "$(nmcli -t radio wifi 2>/dev/null)" = "enabled" ] && echo false || echo true ;;
