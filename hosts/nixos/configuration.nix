@@ -70,6 +70,13 @@
   # Hyprland xdg-desktop-portal, so screenshare/file-picker work.
   programs.hyprland.enable = true;
 
+  # VM workaround: this machine's virtio-gpu rejects atomic modesets for any mode
+  # other than the current one ("atomic drm request: failed to commit: Invalid
+  # argument"), so Hyprland can't set 1920x1200. AQ_NO_ATOMIC makes aquamarine use
+  # the legacy DRM interface, which the virtual GPU accepts. NixOS-machine-only —
+  # it's not synced to the Arch laptop, where atomic modeset is fine on real hw.
+  environment.sessionVariables.AQ_NO_ATOMIC = "1";
+
   # Zsh as the login shell (adds it to /etc/shells, sets up /etc/zshrc).
   # The actual interactive config is the raw ~/.zshrc symlinked by Home Manager.
   programs.zsh.enable = true;
