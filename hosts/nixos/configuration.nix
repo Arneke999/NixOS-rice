@@ -87,7 +87,11 @@
   services.greetd = {
     enable = true;
     settings.default_session = {
-      command = "env AQ_NO_ATOMIC=1 Hyprland";
+      # Launch via NixOS's `start-hyprland` wrapper, NOT bare `Hyprland`.
+      # start-hyprland sets up the proper D-Bus / systemd / portal session env;
+      # launching bare Hyprland skips all that (Hyprland even warns about it) and
+      # makes the session janky. The `env` prefix is inherited through the wrapper.
+      command = "env AQ_NO_ATOMIC=1 start-hyprland";
       user = username;
     };
   };
