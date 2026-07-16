@@ -4,9 +4,9 @@
 # (install.sh) substitutes @HOME@ with your real $HOME to produce config.toml.
 # Edit this template, not the generated config.toml.
 
-[templates.niri]
-input_path = "@HOME@/nix-config/dotfiles/niri/config.kdl.in"
-output_path = "@HOME@/nix-config/dotfiles/niri/config.kdl"
+[templates.hyprland]
+input_path = "@HOME@/nix-config/dotfiles/hypr/hyprland.conf.in"
+output_path = "@HOME@/nix-config/dotfiles/hypr/hyprland.conf"
 
 [templates.fuzzel]
 input_path = "@HOME@/nix-config/dotfiles/fuzzel/fuzzel.ini.in"

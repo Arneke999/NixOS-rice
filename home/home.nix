@@ -16,6 +16,10 @@
     fuzzel
     eww
     jq
+    socat                    # eww workspace widget: Hyprland socket2 event stream
+    grim                     # screenshots (Print binds)
+    slurp                    # region select for screenshots
+    wl-clipboard             # wl-copy — screenshots to clipboard
     brightnessctl
     swaynotificationcenter   # swaync — animated notifications + notification center
     hyprlock                 # the Lain lockscreen (CRT shader, pink input)
@@ -51,8 +55,11 @@
   };
 
   # Out-of-store symlinks: live repo files (hot-reload + matugen can write them).
-  xdg.configFile."niri/config.kdl".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/niri/config.kdl";
+  # hyprland.conf is matugen-generated from hyprland.conf.in (pink border tracks
+  # the wallpaper). Hyprland's search path is ~/.config/hypr, so this drops in
+  # alongside hyprlock/hypridle and is a straight copy to Arch.
+  xdg.configFile."hypr/hyprland.conf".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/hypr/hyprland.conf";
 
   xdg.configFile."kitty/kitty.conf".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/kitty/kitty.conf";

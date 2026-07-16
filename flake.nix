@@ -1,16 +1,15 @@
 {
-	description = "NixOS + Niri rice";
+	description = "NixOS + Hyprland rice";
 	inputs = {
 		nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 		home-manager = {
 			url = "github:nix-community/home-manager/master";
 			inputs.nixpkgs.follows = "nixpkgs";
-		
+
 			};
-		niri.url = "github:sodiboo/niri-flake";
 		};
-	
-	outputs = { self, nixpkgs, home-manager, niri, ... }@inputs:
+
+	outputs = { self, nixpkgs, home-manager, ... }@inputs:
 	let
 		# ── Single source of truth ─────────────────────────────────────────
 		# Change this one line (or set it via install.sh) to rename the user.
@@ -22,7 +21,6 @@
 			specialArgs = { inherit inputs username; };
 			modules = [
 				./hosts/nixos/configuration.nix
-				niri.nixosModules.niri
 				home-manager.nixosModules.home-manager
 				{
 					home-manager.useGlobalPkgs = true;

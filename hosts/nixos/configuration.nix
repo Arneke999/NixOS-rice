@@ -66,8 +66,9 @@
   #Enable SSH
   services.openssh.enable = true;
 
-  #Niri sesison
-  programs.niri.enable = true;
+  # Hyprland session (dynamic tiling). Built into nixpkgs — also pulls in the
+  # Hyprland xdg-desktop-portal, so screenshare/file-picker work.
+  programs.hyprland.enable = true;
 
   # Zsh as the login shell (adds it to /etc/shells, sets up /etc/zshrc).
   # The actual interactive config is the raw ~/.zshrc symlinked by Home Manager.

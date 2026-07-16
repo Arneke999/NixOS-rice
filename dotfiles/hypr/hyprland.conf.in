@@ -1,0 +1,223 @@
+# Hyprland — the working desktop. Dynamic (dwindle) tiling: one window fills the
+# screen, a second auto-splits beside it, a fresh workspace opens empty. NO analog
+# texture here — the CRT/scanline look lives ONLY on hyprlock + the boot splash.
+#
+# Colors are matugen-templated from the wallpaper. Edit hyprland.conf.in, not the
+# generated hyprland.conf. Ported 1:1 from the old niri config.kdl.
+#
+# Docs: https://wiki.hyprland.org/Configuring/
+
+$mod = SUPER
+
+# ── Monitors ───────────────────────────────────────────────────────────────
+# Portable catch-all: every output at its preferred mode, auto-placed, scale 1.
+# (Was a hardcoded "Virtual-1" output under niri — this works on the VM AND the
+# laptop's eDP-1 without editing.)
+monitor = , preferred, auto, 1
+
+# ── Environment ──────────────────────────────────────────────────────────────
+env = XCURSOR_THEME,Bibata-Modern-Classic
+env = XCURSOR_SIZE,20
+
+# ── Startup ──────────────────────────────────────────────────────────────────
+# Make portals / screenshare see the running session.
+exec-once = dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+# Bar (eww).
+exec-once = eww open bar
+# Notification daemon (swaync).
+exec-once = swaync
+# Idle daemon: locks (hyprlock) after 5 min, DPMS-off shortly after.
+exec-once = hypridle
+# Dark GTK / libadwaita prefs (dconf).
+exec-once = ~/nix-config/dotfiles/scripts/gtk-theme.sh
+# Set the wallpaper and re-theme from it on login.
+exec-once = ~/nix-config/dotfiles/scripts/set-wallpaper.sh
+
+# ── Input ────────────────────────────────────────────────────────────────────
+input {
+    numlock_by_default = true
+    # kb_layout is left empty so it inherits the system locale (localectl),
+    # matching the old niri behavior. Set it here if you want azerty etc.
+    follow_mouse = 1
+    touchpad {
+        natural_scroll = true
+        tap-to-click = true
+    }
+}
+
+cursor {
+    inactive_timeout = 0
+}
+
+# ── Layout & look ────────────────────────────────────────────────────────────
+general {
+    gaps_in = 8       # between windows (8+8 ≈ the old niri "gaps 16")
+    gaps_out = 16     # screen edges
+    border_size = 2   # was niri focus-ring width 2
+    # Active border tracks the wallpaper pink; inactive is the old #505050.
+    col.active_border = rgb({{colors.primary.default.hex_stripped}})
+    col.inactive_border = rgb(505050)
+    layout = dwindle
+    resize_on_border = true
+}
+
+decoration {
+    rounding = 8      # was niri geometry-corner-radius 8
+    # Flat, disciplined desktop — no blur, no shadow (texture lives on hyprlock).
+    blur {
+        enabled = false
+    }
+    shadow {
+        enabled = false
+    }
+}
+
+dwindle {
+    pseudotile = true
+    preserve_split = true
+}
+
+misc {
+    disable_hyprland_logo = true
+    disable_splash_rendering = true
+    force_default_wallpaper = 0   # awww paints the wallpaper, not Hyprland
+}
+
+# ── Animations ───────────────────────────────────────────────────────────────
+# Deliberate, fluid motion (Lain: calm + precise, no cartoon bounce). Speeds are
+# in units of 100ms, so 2.25 ≈ 225ms. Ported from the old niri ease-out springs.
+animations {
+    enabled = true
+    bezier = easeOutExpo, 0.16, 1.0, 0.3, 1.0
+    bezier = easeOutQuad, 0.25, 0.46, 0.45, 0.94
+
+    animation = windows,     1, 2.25, easeOutExpo
+    animation = windowsOut,  1, 1.75, easeOutQuad
+    animation = fade,        1, 1.75, easeOutQuad
+    animation = border,      1, 3.0,  easeOutQuad
+    animation = workspaces,  1, 3.0,  easeOutExpo, slide
+}
+
+# ── Window rules ─────────────────────────────────────────────────────────────
+# Firefox picture-in-picture floats (both host + flatpak Firefox).
+windowrulev2 = float, title:^(Picture-in-Picture)$
+
+# ── Binds ────────────────────────────────────────────────────────────────────
+# "Mod" was niri's Super; here $mod = SUPER. Layout is dynamic tiling now, so the
+# niri column/scroll binds are replaced by their dwindle equivalents.
+
+# Apps.
+bind = $mod, Space, exec, kitty
+bind = ALT, Space, exec, fuzzel
+bind = $mod, N, exec, swaync-client -t -sw
+bind = $mod SHIFT, N, exec, swaync-client -d -sw
+# Lock via logind so hypridle catches the signal and runs hyprlock.
+bind = SUPER ALT, L, exec, loginctl lock-session
+# Re-theme from wallpaper.
+bind = $mod SHIFT, W, exec, ~/nix-config/dotfiles/scripts/set-wallpaper.sh
+# Screen reader toggle (works while locked).
+bindl = SUPER ALT, S, exec, pkill orca || orca
+
+# Window management.
+bind = $mod, Q, killactive
+bind = $mod, V, togglefloating
+bind = $mod, F, fullscreen, 1        # maximize (keeps bar/gaps) — was niri maximize-column
+bind = $mod SHIFT, F, fullscreen, 0  # true fullscreen — was niri fullscreen-window
+bind = $mod, R, togglesplit          # flip dwindle split — replaces niri preset widths
+bind = $mod, W, togglegroup          # tabbed group — closest to niri tabbed column
+bind = $mod, Tab, changegroupactive  # cycle within a group
+
+# Focus (arrows + vim keys).
+bind = $mod, left,  movefocus, l
+bind = $mod, down,  movefocus, d
+bind = $mod, up,    movefocus, u
+bind = $mod, right, movefocus, r
+bind = $mod, H, movefocus, l
+bind = $mod, J, movefocus, d
+bind = $mod, K, movefocus, u
+bind = $mod, L, movefocus, r
+
+# Move window.
+bind = $mod CTRL, left,  movewindow, l
+bind = $mod CTRL, down,  movewindow, d
+bind = $mod CTRL, up,    movewindow, u
+bind = $mod CTRL, right, movewindow, r
+bind = $mod CTRL, H, movewindow, l
+bind = $mod CTRL, J, movewindow, d
+bind = $mod CTRL, K, movewindow, u
+bind = $mod CTRL, L, movewindow, r
+
+# Focus monitor.
+bind = $mod SHIFT, left,  focusmonitor, l
+bind = $mod SHIFT, right, focusmonitor, r
+bind = $mod SHIFT, H, focusmonitor, l
+bind = $mod SHIFT, L, focusmonitor, r
+
+# Move window to monitor.
+bind = $mod SHIFT CTRL, left,  movewindow, mon:l
+bind = $mod SHIFT CTRL, right, movewindow, mon:r
+bind = $mod SHIFT CTRL, H, movewindow, mon:l
+bind = $mod SHIFT CTRL, L, movewindow, mon:r
+
+# Resize (repeatable).
+binde = $mod, minus, resizeactive, -10% 0
+binde = $mod, equal, resizeactive, 10% 0
+binde = $mod SHIFT, minus, resizeactive, 0 -10%
+binde = $mod SHIFT, equal, resizeactive, 0 10%
+
+# Workspaces: next/prev (Page keys + U/I, matching the old niri binds).
+bind = $mod, Page_Down, workspace, +1
+bind = $mod, Page_Up,   workspace, -1
+bind = $mod, U, workspace, +1
+bind = $mod, I, workspace, -1
+bind = $mod CTRL, Page_Down, movetoworkspace, +1
+bind = $mod CTRL, Page_Up,   movetoworkspace, -1
+bind = $mod CTRL, U, movetoworkspace, +1
+bind = $mod CTRL, I, movetoworkspace, -1
+
+# Workspaces by number.
+bind = $mod, 1, workspace, 1
+bind = $mod, 2, workspace, 2
+bind = $mod, 3, workspace, 3
+bind = $mod, 4, workspace, 4
+bind = $mod, 5, workspace, 5
+bind = $mod, 6, workspace, 6
+bind = $mod, 7, workspace, 7
+bind = $mod, 8, workspace, 8
+bind = $mod, 9, workspace, 9
+bind = $mod CTRL, 1, movetoworkspace, 1
+bind = $mod CTRL, 2, movetoworkspace, 2
+bind = $mod CTRL, 3, movetoworkspace, 3
+bind = $mod CTRL, 4, movetoworkspace, 4
+bind = $mod CTRL, 5, movetoworkspace, 5
+bind = $mod CTRL, 6, movetoworkspace, 6
+bind = $mod CTRL, 7, movetoworkspace, 7
+bind = $mod CTRL, 8, movetoworkspace, 8
+bind = $mod CTRL, 9, movetoworkspace, 9
+
+# Mouse wheel over the desktop cycles workspaces (was Mod+Wheel in niri).
+bind = $mod, mouse_down, workspace, e+1
+bind = $mod, mouse_up,   workspace, e-1
+# Drag to move / resize floating windows.
+bindm = $mod, mouse:272, movewindow
+bindm = $mod, mouse:273, resizewindow
+
+# Session.
+bind = $mod SHIFT, E, exit
+bind = CTRL ALT, Delete, exit
+bind = $mod SHIFT, P, dpms, off   # blank monitors; any input wakes them
+
+# Screenshots (grim + slurp + wl-clipboard). Copies to clipboard AND saves to
+# ~/Pictures/Screenshots, mirroring the old niri screenshot-path.
+$shotdir = ~/Pictures/Screenshots
+bind = , Print, exec, mkdir -p $shotdir && grim -g "$(slurp)" - | tee "$shotdir/$(date +'Screenshot from %Y-%m-%d %H-%M-%S').png" | wl-copy
+bind = CTRL, Print, exec, mkdir -p $shotdir && grim - | tee "$shotdir/$(date +'Screenshot from %Y-%m-%d %H-%M-%S').png" | wl-copy
+bind = ALT, Print, exec, mkdir -p $shotdir && grim -g "$(hyprctl -j activewindow | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"')" - | tee "$shotdir/$(date +'Screenshot from %Y-%m-%d %H-%M-%S').png" | wl-copy
+
+# Media / brightness keys (work while locked, repeatable where it makes sense).
+bindel = , XF86AudioRaiseVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 10%+
+bindel = , XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 10%-
+bindl  = , XF86AudioMute,        exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+bindl  = , XF86AudioMicMute,     exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+bindel = , XF86MonBrightnessUp,   exec, brightnessctl --class=backlight set +10%
+bindel = , XF86MonBrightnessDown, exec, brightnessctl --class=backlight set 10%-
