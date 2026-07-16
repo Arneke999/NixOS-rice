@@ -75,7 +75,22 @@
   # argument"), so Hyprland can't set 1920x1200. AQ_NO_ATOMIC makes aquamarine use
   # the legacy DRM interface, which the virtual GPU accepts. NixOS-machine-only —
   # it's not synced to the Arch laptop, where atomic modeset is fine on real hw.
+  # Set here for manual/shell launches; also inlined in the greetd command below,
+  # since a greetd-spawned session doesn't source the shell profile.
   environment.sessionVariables.AQ_NO_ATOMIC = "1";
+
+  # Autologin straight into Hyprland — no greeter. greetd runs the session as the
+  # user directly; Hyprland then locks itself immediately (exec-once = hyprlock),
+  # so the Lain lockscreen is the boot "login" gate. Safe here because the disk is
+  # LUKS-encrypted (that covers at-rest; the lock is the awake-session gate). Swap
+  # to a greetd greeter (e.g. tuigreet) later if you want a real pre-session auth.
+  services.greetd = {
+    enable = true;
+    settings.default_session = {
+      command = "env AQ_NO_ATOMIC=1 Hyprland";
+      user = username;
+    };
+  };
 
   # Zsh as the login shell (adds it to /etc/shells, sets up /etc/zshrc).
   # The actual interactive config is the raw ~/.zshrc symlinked by Home Manager.
