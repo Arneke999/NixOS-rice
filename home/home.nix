@@ -24,8 +24,7 @@
     swaynotificationcenter   # swaync — animated notifications + notification center
     hyprlock                 # the Lain lockscreen (CRT shader, pink input)
     hypridle                 # idle -> lock (drives lock via logind for Niri)
-    neovim
-    # Neovim tooling (installed via Nix, NOT mason — mason binaries break on NixOS):
+    neovim                   # Neovim tooling (installed via Nix, NOT mason — mason binaries break on NixOS):
     lua-language-server   # lua_ls
     nixd                  # Nix LSP
     ripgrep               # telescope live-grep
@@ -45,6 +44,7 @@
     papirus-icon-theme
     bibata-cursors
     inter
+    vscodium
   ];
 
   fonts.fontconfig.enable = true;

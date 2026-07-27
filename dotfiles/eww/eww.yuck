@@ -1,11 +1,15 @@
 ;; ── data ─────────────────────────────────────────────────────────
 (defpoll time     :interval "10s" `date +%H:%M`)
 (defpoll date_str :interval "1h"  `date "+%a %d %b"`)
-(defpoll volume     :interval "1s"  :initial "0"  "~/nix-config/dotfiles/eww/scripts/volume.sh")
-(defpoll net        :interval "5s"  :initial '{"icon":"","detail":""}' "~/nix-config/dotfiles/eww/scripts/net.sh")
-(defpoll battery    :interval "10s" :initial '{"present":false,"capacity":0,"status":"none"}'   "~/nix-config/dotfiles/eww/scripts/battery.sh")
-(defpoll brightness :interval "3s"  :initial '{"present":false,"value":0}'                      "~/nix-config/dotfiles/eww/scripts/brightness.sh")
-(defpoll bluetooth  :interval "5s"  :initial '{"present":false,"powered":false,"connected":false}' "~/nix-config/dotfiles/eww/scripts/bluetooth.sh")
+(defpoll volume     :interval "1s"  :initial '{"muted":false,"value":0}'                             "~/nix-config/dotfiles/eww/scripts/volume.sh")
+(defpoll net        :interval "5s"  :initial '{"icon":"","detail":""}'                               "~/nix-config/dotfiles/eww/scripts/net.sh")
+(defpoll battery    :interval "10s" :initial '{"present":false,"capacity":0,"status":"none","icon":"󰂑"}' "~/nix-config/dotfiles/eww/scripts/battery.sh")
+(defpoll brightness :interval "3s"  :initial '{"present":false,"value":0}'                           "~/nix-config/dotfiles/eww/scripts/brightness.sh")
+(defpoll bluetooth  :interval "5s"  :initial '{"present":false,"powered":false,"connected":false}'   "~/nix-config/dotfiles/eww/scripts/bluetooth.sh")
+(defpoll wifi       :interval "10s" :initial '{"enabled":false,"ssid":"","signal":0}'                "~/nix-config/dotfiles/eww/scripts/wifi.sh")
+;; Bluetooth device list is refreshed on demand (popup open / toggle / connect),
+;; not polled, to avoid constant bluetoothctl spawns.
+(defvar  bt_devices "[]")
 (deflisten workspaces :initial "[]" "~/nix-config/dotfiles/eww/scripts/workspaces.sh")
 
 ;; ── widgets ──────────────────────────────────────────────────────
@@ -30,35 +34,101 @@
     (ring :value {EWW_CPU.avg}            :cls "cpu" :icon "" :name "CPU")
     (ring :value {EWW_RAM.used_mem_perc}  :cls "ram" :icon "" :name "RAM")
 
+    ;; Brightness — click opens the slider popup, scroll nudges it (instant update).
     (eventbox :class "bri-box" :visible {brightness.present}
-              :onscroll "[ {} = up ] && brightnessctl set 5%+ || brightnessctl set 5%-"
+              :onclick "~/nix-config/dotfiles/eww/scripts/pop.sh pop-brightness"
+              :onscroll "~/nix-config/dotfiles/eww/scripts/bri-ctl.sh {}"
       (label :class "bri" :text "󰃟 ${brightness.value}%"))
 
+    ;; Volume — click opens the popup, middle-click mutes, scroll changes it.
     (eventbox :class "vol-box"
-              :onscroll "[ {} = up ] && wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+ || wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
-              :onclick "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+              :onclick "~/nix-config/dotfiles/eww/scripts/pop.sh pop-audio"
+              :onmiddleclick "~/nix-config/dotfiles/eww/scripts/vol-ctl.sh mute"
+              :onscroll "~/nix-config/dotfiles/eww/scripts/vol-ctl.sh {}"
       (label :class "vol"
-        :text {volume == "muted" ? "󰝟" :
-               volume < 34       ? "󰕿 ${volume}%" :
-               volume < 67       ? "󰖀 ${volume}%" :
-                                   "󰕾 ${volume}%"}))
+        :text {volume.muted ? "󰝟" :
+               volume.value < 34 ? "󰕿 ${volume.value}%" :
+               volume.value < 67 ? "󰖀 ${volume.value}%" :
+                                   "󰕾 ${volume.value}%"}))
 
-    (label :class "net"  :text {net.icon} :tooltip {net.detail})
+    ;; Wi-Fi — click opens the popup.
+    (eventbox :class "net-box" :onclick "~/nix-config/dotfiles/eww/scripts/pop.sh pop-wifi"
+      (label :class "net" :text {net.icon} :tooltip {net.detail}))
 
+    ;; Bluetooth — click opens the popup (refreshes device list first),
+    ;; middle-click toggles the adapter.
     (eventbox :class "bt-box" :visible {bluetooth.present}
-              :onclick "~/nix-config/dotfiles/eww/scripts/bt-toggle.sh"
+              :onclick "~/nix-config/dotfiles/eww/scripts/bt-open.sh"
+              :onmiddleclick "~/nix-config/dotfiles/eww/scripts/bt-toggle.sh"
       (label :class {bluetooth.connected ? "bt connected" : bluetooth.powered ? "bt on" : "bt off"}
              :text {bluetooth.connected ? "󰂱" : bluetooth.powered ? "󰂯" : "󰂲"}))
 
+    ;; Battery — clear icon + %, glyph reflects level, colour reflects charge state.
     (box :class "bat-box" :visible {battery.present}
          :tooltip "battery  ${battery.capacity}%  ·  ${battery.status}"
-      (circular-progress :class {battery.status == "Charging" ? "ring bat charging" :
-                                 battery.capacity <= 15    ? "ring bat low" : "ring bat"}
-                         :value {battery.capacity} :thickness 3 :start-at 75 :clockwise true
-        (label :class "ring-icon" :text {battery.status == "Charging" ? "󰂄" : "󰁹"})))
+      (label :class {battery.charging ? "bat charging" :
+                     battery.plugged  ? "bat plugged" :
+                     battery.capacity <= 15 ? "bat low" : "bat"}
+             :text "${battery.icon} ${battery.capacity}%"))
 
-    (eventbox :class "date-box" :onclick "eww open --toggle calendar"
+    (eventbox :class "date-box" :onclick "~/nix-config/dotfiles/eww/scripts/pop.sh calendar"
       (label :class "date" :text date_str))))
+
+;; ── popups ───────────────────────────────────────────────────────
+(defwidget pop-brightness-w []
+  (box :class "pill popup" :orientation "v" :space-evenly false :spacing 8
+    (label :class "popup-title" :halign "start" :text "Brightness")
+    (box :space-evenly false :spacing 10
+      (label :class "popup-icon" :text "󰃟")
+      (scale :class "popup-scale" :hexpand true :orientation "h" :flipped false
+             :value {brightness.value} :min 1 :max 101
+             :onchange "~/nix-config/dotfiles/eww/scripts/bri-ctl.sh set {}")
+      (label :class "popup-val" :text "${brightness.value}%"))))
+
+(defwidget pop-audio-w []
+  (box :class "pill popup" :orientation "v" :space-evenly false :spacing 8
+    (label :class "popup-title" :halign "start" :text "Volume")
+    (box :space-evenly false :spacing 10
+      (eventbox :class "popup-icon-btn" :onclick "~/nix-config/dotfiles/eww/scripts/vol-ctl.sh mute"
+        (label :class "popup-icon" :text {volume.muted ? "󰝟" : "󰕾"}))
+      (scale :class "popup-scale" :hexpand true :orientation "h" :flipped false
+             :value {volume.muted ? 0 : volume.value} :min 0 :max 101
+             :onchange "~/nix-config/dotfiles/eww/scripts/vol-ctl.sh set {}")
+      (label :class "popup-val" :text {volume.muted ? "muted" : "${volume.value}%"}))))
+
+(defwidget pop-wifi-w []
+  (box :class "pill popup" :orientation "v" :space-evenly false :spacing 10
+    (box :space-evenly false :spacing 8
+      (label :class "popup-title" :hexpand true :halign "start" :text "Wi-Fi")
+      (button :class {wifi.enabled ? "toggle on" : "toggle off"}
+              :onclick "~/nix-config/dotfiles/eww/scripts/wifi-toggle.sh"
+        (label :text {wifi.enabled ? "on" : "off"})))
+    (label :class "popup-sub" :halign "start" :wrap true
+           :text {!wifi.enabled ? "radio off" :
+                  wifi.ssid != "" ? "${wifi.ssid}  ·  ${wifi.signal}%" : "not connected"})
+    (button :class "popup-manage" :onclick "kitty -e nmtui"
+      (label :text "Manage networks"))))
+
+(defwidget pop-bt-w []
+  (box :class "pill popup" :orientation "v" :space-evenly false :spacing 10
+    (box :space-evenly false :spacing 8
+      (label :class "popup-title" :hexpand true :halign "start" :text "Bluetooth")
+      (button :class {bluetooth.powered ? "toggle on" : "toggle off"}
+              :onclick "~/nix-config/dotfiles/eww/scripts/bt-toggle.sh"
+        (label :text {bluetooth.powered ? "on" : "off"})))
+    (box :orientation "v" :space-evenly false :spacing 4
+         :visible {bluetooth.powered && (arraylength(bt_devices) > 0)}
+      (for d in bt_devices
+        (button :class {d.connected ? "bt-dev connected" : "bt-dev"}
+                :onclick "~/nix-config/dotfiles/eww/scripts/bt-connect.sh ${d.mac}"
+          (box :space-evenly false :spacing 8
+            (label :text {d.connected ? "󰂱" : "󰂯"})
+            (label :hexpand true :halign "start" :limit-width 20 :text {d.name})))))
+    (label :class "popup-sub" :halign "start"
+           :visible {bluetooth.powered && (arraylength(bt_devices) == 0)}
+           :text "no paired devices")
+    (button :class "popup-manage" :onclick "kitty -e bluetoothctl"
+      (label :text "Manage"))))
 
 ;; ── bar ──────────────────────────────────────────────────────────
 (defwindow bar
@@ -71,9 +141,37 @@
     (box :halign "center" (clock))
     (box :halign "end"    (metrics))))
 
+;; Fullscreen transparent click-catcher opened behind every popup. A click that
+;; lands off the popup hits this and closes the lot (eww has no native
+;; close-on-focus-loss). Popups open AFTER it, so they stack above it.
+(defwindow pop-backdrop
+  :monitor 0 :stacking "overlay" :focusable false
+  :geometry (geometry :width "100%" :height "100%" :anchor "center")
+  (eventbox :onclick "~/nix-config/dotfiles/eww/scripts/pop.sh close"
+    (box :class "backdrop")))
+
 (defwindow calendar
-  :monitor 0
+  :monitor 0 :stacking "overlay"
   :geometry (geometry :y "6px" :x "8px" :anchor "top right" :width "260px")
-  :stacking "fg"
   (box :class "pill cal-pop"
     (calendar :class "cal")))
+
+(defwindow pop-brightness
+  :monitor 0 :stacking "overlay"
+  :geometry (geometry :y "6px" :x "8px" :anchor "top right" :width "260px")
+  (pop-brightness-w))
+
+(defwindow pop-audio
+  :monitor 0 :stacking "overlay"
+  :geometry (geometry :y "6px" :x "8px" :anchor "top right" :width "260px")
+  (pop-audio-w))
+
+(defwindow pop-wifi
+  :monitor 0 :stacking "overlay"
+  :geometry (geometry :y "6px" :x "8px" :anchor "top right" :width "260px")
+  (pop-wifi-w))
+
+(defwindow pop-bt
+  :monitor 0 :stacking "overlay"
+  :geometry (geometry :y "6px" :x "8px" :anchor "top right" :width "260px")
+  (pop-bt-w))

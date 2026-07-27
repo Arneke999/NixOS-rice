@@ -45,11 +45,22 @@
 .vol,
 .net,
 .bri,
+.bat,
 .date { color: #e5bdbf; }
+
+// Battery is now a plain icon + % label (was a ring): colour signals the state.
+.bat.charging { color: #7fd6a0; }
+.bat.plugged  { color: #e5bdbf; }
+.bat.low      { color: #ff5555; }
 
 .bt { color: #8a8a90; }
 .bt.on { color: #e5bdbf; }
 .bt.connected { color: #ffb2b9; }
+
+// Click-away backdrop behind popups — a real (near-invisible) surface so it
+// still catches pointer events; not fully transparent, which some GTK builds
+// treat as click-through.
+.backdrop { background-color: rgba(0, 0, 0, 0.01); }
 
 tooltip {
   background-color: #0f0f11;
@@ -68,3 +79,52 @@ tooltip label {
 }
 .cal-pop calendar:selected { color: #ffb2b9; }
 .cal-pop calendar.header { color: #ffb2b9; }
+
+// ── popups (brightness / audio / wifi / bluetooth) ────────────────
+.popup { padding: 14px 16px; }
+.popup-title { color: #ffb2b9; font-size: 13px; }
+.popup-sub   { color: #8a8a90; font-size: 12px; }
+.popup-icon  { color: #e5bdbf; font-size: 18px; }
+.popup-icon-btn { padding: 0 2px; }
+.popup-val   { color: #c8c8ce; font-size: 12px; min-width: 40px; }
+
+// eww scale (slider) — pink filled track, near-black trough, round knob.
+scale trough {
+  background-color: #2a2a30;
+  border-radius: 12px;
+  min-height: 6px;
+  min-width: 120px;
+}
+scale trough highlight {
+  background-color: #ffb2b9;
+  border-radius: 12px;
+}
+scale slider {
+  background-color: #c8c8ce;
+  border-radius: 50%;
+  min-height: 14px;
+  min-width: 14px;
+  margin: -6px 0;
+}
+
+// on/off pill toggles + list rows + launcher button.
+.toggle { padding: 2px 14px; border-radius: 10px; }
+.toggle.on  { background-color: #ffb2b9; color: #0f0f11; }
+.toggle.off { background-color: #2a2a30; color: #8a8a90; }
+
+.bt-dev {
+  padding: 4px 8px;
+  border-radius: 8px;
+  color: #c8c8ce;
+  background-color: transparent;
+}
+.bt-dev:hover { background-color: #1a1a1f; }
+.bt-dev.connected { color: #ffb2b9; }
+
+.popup-manage {
+  padding: 6px;
+  border-radius: 10px;
+  background-color: #17171a;
+  color: #c8c8ce;
+}
+.popup-manage:hover { background-color: #22222a; }

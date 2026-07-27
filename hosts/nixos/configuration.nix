@@ -13,8 +13,14 @@
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
+  boot.loader.systemd-boot.enable = false;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.grub = {
+    enable = true;
+    efiSupport = true;
+    device = "nodev";
+    useOSProber = true;
+    };
 
   # Boot splash: the Lain theme (near-black + pink wired motif). Texture is kept
   # restrained here; the heavier CRT look lives on the hyprlock lockscreen.
@@ -77,24 +83,49 @@
   # it's not synced to the Arch laptop, where atomic modeset is fine on real hw.
   # Set here for manual/shell launches; also inlined in the greetd command below,
   # since a greetd-spawned session doesn't source the shell profile.
-  environment.sessionVariables.AQ_NO_ATOMIC = "1";
+  # environment.sessionVariables.AQ_NO_ATOMIC = "1";
 
-  # Autologin straight into Hyprland — no greeter. greetd runs the session as the
-  # user directly; Hyprland then locks itself immediately (exec-once = hyprlock),
-  # so the Lain lockscreen is the boot "login" gate. Safe here because the disk is
-  # LUKS-encrypted (that covers at-rest; the lock is the awake-session gate). Swap
-  # to a greetd greeter (e.g. tuigreet) later if you want a real pre-session auth.
-  services.greetd = {
+  # Boot login: ReGreet — a graphical greetd greeter (GTK4 / libadwaita). This is a
+  # REAL pre-session login: you authenticate at a proper greeter before Hyprland
+  # ever starts. It replaces the old autologin→hyprlock gate, which was only
+  # acceptable while the disk was LUKS-encrypted — now that the drive is NOT
+  # encrypted, autologin-into-a-lock is no longer a real auth boundary (anything
+  # that stopped hyprlock would drop straight into a live session). hyprlock stays
+  # for idle-lock (hypridle) and the manual Super+Alt+L bind.
+  #
+  # ReGreet runs inside a `cage` kiosk compositor (pulled in automatically), and
+  # programs.regreet.enable configures services.greetd for us — so we no longer set
+  # default_session by hand.
+  programs.regreet = {
     enable = true;
-    settings.default_session = {
-      # Launch via NixOS's `start-hyprland` wrapper, NOT bare `Hyprland`.
-      # start-hyprland sets up the proper D-Bus / systemd / portal session env;
-      # launching bare Hyprland skips all that (Hyprland even warns about it) and
-      # makes the session janky. The `env` prefix is inherited through the wrapper.
-      command = "env AQ_NO_ATOMIC=1 start-hyprland";
-      user = username;
+    settings = {
+      # The greeter runs as the unprivileged `greeter` user, which can't read
+      # /home/lain, so point at the wallpaper straight from the repo — Nix copies
+      # it into the world-readable store. Fixed image (like the Plymouth splash):
+      # the login screen predates knowing the live desktop wallpaper.
+      background = {
+        path = "${../../wallpapers/lain.jpg}";
+        fit = "Cover";
+      };
+      GTK.application_prefer_dark_theme = true;
     };
+    theme       = { name = "adw-gtk3-dark";         package = pkgs.adw-gtk3; };
+    iconTheme   = { name = "Papirus-Dark";          package = pkgs.papirus-icon-theme; };
+    cursorTheme = { name = "Bibata-Modern-Classic"; package = pkgs.bibata-cursors; };
+    font        = { name = "Inter"; size = 12;      package = pkgs.inter; };
+    # Pink accent to match the rice (ReGreet is libadwaita — theme via accent color).
+    extraCss = ''
+      @define-color accent_color #ffb2b9;
+      @define-color accent_bg_color #ffb2b9;
+    '';
   };
+
+  # ReGreet lists sessions from the system's wayland-sessions dir, which is empty
+  # unless a package's session file is registered here (autologin never needed one).
+  # Expose Hyprland's session file — it launches the correct `start-hyprland`
+  # wrapper — so "Hyprland" appears in, and can actually be launched from, the
+  # greeter. Without this you'd boot into a greeter with no session to start.
+  services.displayManager.sessionPackages = [ config.programs.hyprland.package ];
 
   # Zsh as the login shell (adds it to /etc/shells, sets up /etc/zshrc).
   # The actual interactive config is the raw ~/.zshrc symlinked by Home Manager.
