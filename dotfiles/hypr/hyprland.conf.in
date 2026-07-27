@@ -45,9 +45,15 @@ input {
     # kb_layout is left empty so it inherits the system locale (localectl),
     # matching the old niri behavior. Set it here if you want azerty etc.
     follow_mouse = 1
+    # Pointer speed (libinput accel, range -1.0 … 1.0). Bumped up because the
+    # touchpad felt sluggish — you had to drag a long way to move the cursor.
+    # Tune to taste; lower if it now feels too twitchy.
+    sensitivity = 0.5
     touchpad {
         natural_scroll = true
         tap-to-click = true
+        # Larger multiplier = less finger travel to cross the screen.
+        scroll_factor = 1.0
     }
 }
 
@@ -89,18 +95,25 @@ misc {
 }
 
 # ── Animations ───────────────────────────────────────────────────────────────
-# Deliberate, fluid motion (Lain: calm + precise, no cartoon bounce). Speeds are
-# in units of 100ms, so 2.25 ≈ 225ms. Ported from the old niri ease-out springs.
+# Snappy, evenly-decelerating motion (Lain: calm + precise, no cartoon bounce).
+# Speeds are in units of 100ms, so 2.0 = 200ms. The old profile used easeOutExpo,
+# which dumps ~80% of the motion into the first fifth of the animation then crawls
+# to a stop — that long tail reads as choppy/laggy. `snap` settles quickly and
+# evenly; `easeOut` is the classic CSS ease-out. Shorter durations feel more
+# responsive. (Hardware is confirmed GPU-accelerated at 60Hz, so this is a feel
+# tune, not a perf fix — if any residual stutter remains it's frame pacing.)
 animations {
     enabled = true
-    bezier = easeOutExpo, 0.16, 1.0, 0.3, 1.0
-    bezier = easeOutQuad, 0.25, 0.46, 0.45, 0.94
+    bezier = snap,    0.3, 1.0, 0.4, 1.0     # quick, clean settle — no long tail
+    bezier = easeOut, 0.25, 0.1, 0.25, 1.0   # classic even ease-out
 
-    animation = windows,     1, 2.25, easeOutExpo
-    animation = windowsOut,  1, 1.75, easeOutQuad
-    animation = fade,        1, 1.75, easeOutQuad
-    animation = border,      1, 3.0,  easeOutQuad
-    animation = workspaces,  1, 3.0,  easeOutExpo, slide
+    animation = windows,     1, 2.0, snap, popin 92%
+    animation = windowsIn,   1, 2.0, snap, popin 92%
+    animation = windowsOut,  1, 1.5, easeOut, popin 92%
+    animation = windowsMove, 1, 2.0, snap
+    animation = fade,        1, 1.5, easeOut
+    animation = border,      1, 3.0, easeOut
+    animation = workspaces,  1, 2.2, snap, slide
 }
 
 # ── Window rules ─────────────────────────────────────────────────────────────

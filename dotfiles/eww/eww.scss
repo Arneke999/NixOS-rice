@@ -30,9 +30,9 @@
 .metrics label { padding: 0 6px; }
 
 .ring {
-  min-width: 27px;
-  min-height: 27px;
-  margin: 0 4px;
+  min-width: 32px;
+  min-height: 32px;
+  margin: 0 5px;
   background-color: #2a2a30;
 }
 .ring.cpu { color: #ffb2b9; }
@@ -40,7 +40,7 @@
 .ring.bat { color: #e5bdbf; }
 .ring.bat.charging { color: #7fd6a0; }
 .ring.bat.low { color: #ff5555; }
-.ring-icon { font-size: 10px; color: #8a8a90; }
+.ring-icon { font-size: 13px; color: #8a8a90; }
 
 .vol,
 .net,

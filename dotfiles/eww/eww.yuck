@@ -26,7 +26,7 @@
 
 (defwidget ring [value cls icon name]
   (eventbox :tooltip "${name}  ${round(value, 0)}%"
-    (circular-progress :class "ring ${cls}" :value value :thickness 3 :start-at 75 :clockwise true
+    (circular-progress :class "ring ${cls}" :value value :thickness 4 :start-at 75 :clockwise true
       (label :class "ring-icon" :text icon))))
 
 (defwidget metrics []
@@ -106,7 +106,7 @@
     (label :class "popup-sub" :halign "start" :wrap true
            :text {!wifi.enabled ? "radio off" :
                   wifi.ssid != "" ? "${wifi.ssid}  ·  ${wifi.signal}%" : "not connected"})
-    (button :class "popup-manage" :onclick "kitty -e nmtui"
+    (button :class "popup-manage" :onclick "~/nix-config/dotfiles/eww/scripts/term.sh nmtui"
       (label :text "Manage networks"))))
 
 (defwidget pop-bt-w []
@@ -127,7 +127,7 @@
     (label :class "popup-sub" :halign "start"
            :visible {bluetooth.powered && (arraylength(bt_devices) == 0)}
            :text "no paired devices")
-    (button :class "popup-manage" :onclick "kitty -e bluetoothctl"
+    (button :class "popup-manage" :onclick "~/nix-config/dotfiles/eww/scripts/term.sh bluetoothctl"
       (label :text "Manage"))))
 
 ;; ── bar ──────────────────────────────────────────────────────────
