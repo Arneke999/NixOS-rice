@@ -10,13 +10,23 @@
 ;; Bluetooth device list is refreshed on demand (popup open / toggle / connect),
 ;; not polled, to avoid constant bluetoothctl spawns.
 (defvar  bt_devices "[]")
+(defvar  bt_scan "[]")           ;; newly-discovered (unpaired) devices after a scan
+(defvar  bt_scanning false)      ;; true while a scan is running (button shows "scanning…")
+(defvar  wifi_nets "[]")         ;; nearby Wi-Fi networks for the picker (refreshed on popup open)
 (deflisten workspaces :initial "[]" "~/nix-config/dotfiles/eww/scripts/workspaces.sh")
+;; id of a workspace that just got a window while unfocused → flash its dot ("" = none)
+(deflisten ws_blink :initial "" "~/nix-config/dotfiles/eww/scripts/ws-blink.sh")
 
 ;; ── widgets ──────────────────────────────────────────────────────
 (defwidget workspaces []
-  (box :class "pill ws" :space-evenly false :spacing 3
+  ;; The class ternary references ws_blink eagerly (both branches are "pill ws") only
+  ;; to force eww to *demand* the ws_blink deflisten — a var used solely inside a
+  ;; `for` body isn't demanded, so its listener would never spawn otherwise.
+  (box :class {ws_blink == "" ? "pill ws" : "pill ws"} :space-evenly false :spacing 3
     (for ws in workspaces
-      (label :class {ws.is_focused ? "ws-dot focused" : ws.is_active ? "ws-dot active" : "ws-dot empty"}
+      (label :class {ws.is_focused ? "ws-dot focused" :
+                     ws.idx == ws_blink ? "ws-dot active blink" :
+                     ws.is_active ? "ws-dot active" : "ws-dot empty"}
              :text {ws.is_active ? "●" : "○"}))))
 
 (defwidget clock []
@@ -51,8 +61,8 @@
                volume.value < 67 ? "󰖀 ${volume.value}%" :
                                    "󰕾 ${volume.value}%"}))
 
-    ;; Wi-Fi — click opens the popup.
-    (eventbox :class "net-box" :onclick "~/nix-config/dotfiles/eww/scripts/pop.sh pop-wifi"
+    ;; Wi-Fi — click opens the popup (refreshes the network list first).
+    (eventbox :class "net-box" :onclick "~/nix-config/dotfiles/eww/scripts/wifi-open.sh"
       (label :class "net" :text {net.icon} :tooltip {net.detail}))
 
     ;; Bluetooth — click opens the popup (refreshes device list first),
@@ -100,14 +110,30 @@
   (box :class "pill popup" :orientation "v" :space-evenly false :spacing 10
     (box :space-evenly false :spacing 8
       (label :class "popup-title" :hexpand true :halign "start" :text "Wi-Fi")
+      (button :class "popup-manage" :tooltip "Rescan"
+              :onclick "~/nix-config/dotfiles/eww/scripts/wifi-rescan.sh"
+        (label :text "󰑐"))
       (button :class {wifi.enabled ? "toggle on" : "toggle off"}
               :onclick "~/nix-config/dotfiles/eww/scripts/wifi-toggle.sh"
         (label :text {wifi.enabled ? "on" : "off"})))
     (label :class "popup-sub" :halign "start" :wrap true
            :text {!wifi.enabled ? "radio off" :
                   wifi.ssid != "" ? "${wifi.ssid}  ·  ${wifi.signal}%" : "not connected"})
-    (button :class "popup-manage" :onclick "~/nix-config/dotfiles/eww/scripts/term.sh nmtui"
-      (label :text "Manage networks"))))
+    ;; Scrollable list of nearby networks — click to (re)connect; secured ones prompt
+    ;; for a password in a themed fuzzel. Reuses the .bt-dev row styling.
+    (scroll :height 220 :vscroll true :visible {wifi.enabled && arraylength(wifi_nets) > 0}
+      (box :orientation "v" :space-evenly false :spacing 3
+        (for n in wifi_nets
+          (button :class {n.active ? "bt-dev connected" : "bt-dev"}
+                  :onclick "~/nix-config/dotfiles/eww/scripts/wifi-connect.sh '${n.ssid}' ${n.secure}"
+            (box :space-evenly false :spacing 8
+              (label :text {n.signal >= 80 ? "󰤨" : n.signal >= 55 ? "󰤥" :
+                            n.signal >= 30 ? "󰤢" : n.signal >= 5 ? "󰤟" : "󰤯"})
+              (label :hexpand true :halign "start" :limit-width 18 :text {n.ssid})
+              (label :class "wifi-lock" :text {n.secure ? "󰌾" : ""}))))))
+    (label :class "popup-sub" :halign "start"
+           :visible {wifi.enabled && arraylength(wifi_nets) == 0}
+           :text "no networks — hit rescan")))
 
 (defwidget pop-bt-w []
   (box :class "pill popup" :orientation "v" :space-evenly false :spacing 10
@@ -127,8 +153,19 @@
     (label :class "popup-sub" :halign "start"
            :visible {bluetooth.powered && (arraylength(bt_devices) == 0)}
            :text "no paired devices")
-    (button :class "popup-manage" :onclick "~/nix-config/dotfiles/eww/scripts/term.sh bluetoothctl"
-      (label :text "Manage"))))
+    ;; Newly-discovered devices from a scan — click to pair + connect.
+    (box :orientation "v" :space-evenly false :spacing 4
+         :visible {bluetooth.powered && arraylength(bt_scan) > 0}
+      (label :class "popup-sub" :halign "start" :text "nearby")
+      (for s in bt_scan
+        (button :class "bt-dev" :onclick "~/nix-config/dotfiles/eww/scripts/bt-pair.sh ${s.mac}"
+          (box :space-evenly false :spacing 8
+            (label :text "󰂲")
+            (label :hexpand true :halign "start" :limit-width 18 :text {s.name})
+            (label :class "wifi-lock" :text "pair")))))
+    (button :class "popup-manage" :visible {bluetooth.powered}
+            :onclick "~/nix-config/dotfiles/eww/scripts/bt-scan-run.sh"
+      (label :text {bt_scanning ? "scanning…" : "Scan for devices"}))))
 
 ;; ── bar ──────────────────────────────────────────────────────────
 (defwindow bar

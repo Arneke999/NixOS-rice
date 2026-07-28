@@ -28,31 +28,31 @@ let
       FormBackgroundColor = "#0f0f11";
       DimBackgroundColor = "#0a0a0b";
       # Text.
-      HeaderTextColor = "#e8e8ee";
-      DateTextColor = "#8a8a90";
-      TimeTextColor = "#e8e8ee";
-      PlaceholderTextColor = "#8a8a90";
+      HeaderTextColor = "#cdd6f4";
+      DateTextColor = "#a6adc8";
+      TimeTextColor = "#cdd6f4";
+      PlaceholderTextColor = "#a6adc8";
       # Input fields (pink icons).
       LoginFieldBackgroundColor = "#17171a";
       PasswordFieldBackgroundColor = "#17171a";
-      LoginFieldTextColor = "#e8e8ee";
-      PasswordFieldTextColor = "#e8e8ee";
-      UserIconColor = "#ffb2b9";
-      PasswordIconColor = "#ffb2b9";
-      HoverUserIconColor = "#ffc9ce";
-      HoverPasswordIconColor = "#ffc9ce";
+      LoginFieldTextColor = "#cdd6f4";
+      PasswordFieldTextColor = "#cdd6f4";
+      UserIconColor = "#f5c2e7";
+      PasswordIconColor = "#f5c2e7";
+      HoverUserIconColor = "#f5e0dc";
+      HoverPasswordIconColor = "#f5e0dc";
       # Login button = pink; power icons muted.
-      LoginButtonBackgroundColor = "#ffb2b9";
+      LoginButtonBackgroundColor = "#f5c2e7";
       LoginButtonTextColor = "#0f0f11";
-      SystemButtonsIconsColor = "#8a8a90";
+      SystemButtonsIconsColor = "#a6adc8";
       # Highlights + dropdowns (session / user pickers).
       HighlightTextColor = "#0f0f11";
-      HighlightBackgroundColor = "#ffb2b9";
-      HighlightBorderColor = "#ffb2b9";
+      HighlightBackgroundColor = "#f5c2e7";
+      HighlightBorderColor = "#f5c2e7";
       DropdownBackgroundColor = "#0f0f11";
-      DropdownTextColor = "#e8e8ee";
-      DropdownSelectedBackgroundColor = "#ffb2b9";
-      WarningColor = "#ff5555";
+      DropdownTextColor = "#cdd6f4";
+      DropdownSelectedBackgroundColor = "#f5c2e7";
+      WarningColor = "#f38ba8";
     };
   };
 in
@@ -96,7 +96,12 @@ in
   # Quiet the kernel/initrd log spam so the splash reads clean.
   boot.consoleLogLevel = 0;
   boot.initrd.verbose = false;
-  boot.kernelParams = [ "quiet" "splash" "loglevel=3" "rd.udev.log_level=3" ];
+  # i915.enable_psr=0 disables Panel Self-Refresh. The kernel logs "Selective fetch
+  # area calculation failed in pipe A" — a PSR2 selective-fetch bug on this Arrow Lake
+  # eDP panel — which reads as stuttery, ~30fps animations. Disabling PSR trades a
+  # little idle battery for smooth motion. (Middle ground if power matters later:
+  # i915.enable_psr=1, i.e. PSR1 only, no PSR2 selective fetch.)
+  boot.kernelParams = [ "quiet" "splash" "loglevel=3" "rd.udev.log_level=3" "i915.enable_psr=0" ];
 
   networking.hostName = "nixos"; # Define your hostname.
 
@@ -156,6 +161,14 @@ in
     package = pkgs.kdePackages.sddm;   # Qt6 SDDM — the theme is Qt6/QML
     theme = "sddm-astronaut-theme";
     extraPackages = [ sddm-astronaut ];
+    # The greeter runs as the `sddm` user under weston, so the home-session
+    # XCURSOR_THEME never reaches it → no visible pointer (had to Tab around).
+    # SDDM exports these to the greeter's cursor; the theme itself is on the system
+    # profile below (bibata-cursors) so weston can find it in the icon search path.
+    settings.Theme = {
+      CursorTheme = "Bibata-Modern-Classic";
+      CursorSize = 24;
+    };
   };
   # Default to the plain Hyprland session (start-hyprland — the launch path ReGreet
   # used successfully), NOT the uwsm-managed one, to avoid a second variable.
@@ -292,6 +305,8 @@ in
     xdg-user-dirs
     bluez # bluetoothctl for the eww bluetooth widget
     sddm-astronaut # SDDM greeter theme (also in sddm.extraPackages; here so it's on the system profile)
+    bibata-cursors # cursor theme for the SDDM greeter (matches the home-session cursor)
+    spotify
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

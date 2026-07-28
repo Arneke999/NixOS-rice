@@ -1,21 +1,21 @@
-# Starship prompt — themed from matugen (generated from starship.toml.in).
+# Starship prompt — Catppuccin Mocha (pink accent), static.
 # Style: lean/Pure (à la zenities) — single line, no icons, no filler words,
 # subtle grey git, coloured ❯. Command time is right-aligned.
 "$schema" = 'https://starship.rs/config-schema.json'
 add_newline = true
-palette = "wallpaper"
+palette = "mocha"
 # NOTE: format/right_format MUST stay above the first [table] header, or TOML
 # folds them into that table and starship silently falls back to its default.
 format = "$directory$git_branch$git_status$character"
 right_format = "$cmd_duration"
 
-[palettes.wallpaper]
-primary   = "#ffb2b9"
-secondary = "#e5bdbf"
-tertiary  = "#e8c08e"
-error     = "#ffb4ab"
-muted     = "#9f8c8d"
-text      = "#f0dedf"
+[palettes.mocha]
+primary   = "#f5c2e7"
+secondary = "#cba6f7"
+tertiary  = "#b4befe"
+error     = "#f38ba8"
+muted     = "#585b70"
+text      = "#cdd6f4"
 
 [directory]
 format = "[$path]($style)[$read_only]($read_only_style) "

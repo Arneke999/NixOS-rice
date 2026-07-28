@@ -54,7 +54,7 @@ if (( ! ${+functions[_zsh_autosuggest_start]} )); then
        /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 fi
 
-# ── Prompt (Starship, themed from matugen) ───────────────────────────────────
+# ── Prompt (Starship, Catppuccin Mocha) ──────────────────────────────────────
 command -v starship >/dev/null && eval "$(starship init zsh)"
 
 # ── fastfetch: run on demand with `ff` (no auto-greeting on every shell) ─────

@@ -3,17 +3,16 @@
 # alive. The heavier CRT texture (scanlines/glow) lives on the hyprlock
 # lockscreen; boot stays minimal.
 #
-# The accent pink is fixed here (#ffb2b9) — boot happens before we know the
-# wallpaper, so it can't be matugen-dynamic. It matches matugen's pink bias.
+# The accent pink is Catppuccin Mocha pink (#f5c2e7), matching the rest of the rice.
 
 # --- near-black background (#0a0a0b) ---
 Window.SetBackgroundTopColor(0.039, 0.039, 0.043);
 Window.SetBackgroundBottomColor(0.039, 0.039, 0.043);
 
-# pink = #ffb2b9
-pink_r = 1.0;
-pink_g = 0.698;
-pink_b = 0.725;
+# pink = #f5c2e7 (Catppuccin Mocha pink)
+pink_r = 0.961;
+pink_g = 0.761;
+pink_b = 0.906;
 
 # --- the wired line, centered ---
 line = Image.Text("present day,  present time", pink_r, pink_g, pink_b);

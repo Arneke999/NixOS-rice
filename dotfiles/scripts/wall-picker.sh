@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Wallpaper picker (Super+W). A fuzzel list of the repo wallpapers, each row showing
-# a small thumbnail, applied (with an awww transition) via set-wallpaper.sh — which
-# also re-themes everything via matugen. Uses a dedicated fuzzel config (picker.ini)
+# a small thumbnail, applied (with an awww transition) via set-wallpaper.sh.
+# (Colours are a fixed Catppuccin palette now — this only swaps the image.)
+# Uses a dedicated fuzzel config (picker.ini)
 # with icons ON; the Alt+Space launcher's fuzzel.ini keeps icons off.
 #
 # NOTE: bash strings can't hold NUL bytes, so the dmenu feed (which needs
@@ -43,14 +44,15 @@ args=(--dmenu --prompt '󰸉  ')
 # Generate/refresh thumbnails, emit the dmenu feed with per-row icons, pick one.
 choice="$(
   for name in "${names[@]}"; do
-    src="${MAP[$name]}"; icon="$src"
-    if [ "${#MAGICK[@]}" -gt 0 ]; then
-      thumb="$THUMBS/${name}.png"
-      if [ ! -f "$thumb" ] || [ "$src" -nt "$thumb" ]; then
-        "${MAGICK[@]}" "$src" -thumbnail '200x120^' -gravity center -extent 200x120 "$thumb" 2>/dev/null || thumb="$src"
-      fi
-      icon="$thumb"
+    src="${MAP[$name]}"; thumb="$THUMBS/${name}.png"; icon="$src"
+    if [ -f "$thumb" ] && [ ! "$src" -nt "$thumb" ]; then
+      icon="$thumb"                                    # fresh cached thumbnail
+    elif [ "${#MAGICK[@]}" -gt 0 ] && \
+         "${MAGICK[@]}" "$src" -thumbnail '200x120^' -gravity center -extent 200x120 "$thumb" 2>/dev/null; then
+      icon="$thumb"                                    # generated a fresh one
     fi
+    # NOTE: fuzzel's build has no JPEG/WEBP loader, so the icon MUST be the PNG
+    # thumbnail; several wallpapers are JPEG/WEBP despite a .png name.
     printf '%s\0icon\x1f%s\n' "$name" "$icon"
   done | fuzzel "${args[@]}"
 )" || exit 0

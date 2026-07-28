@@ -1,13 +1,13 @@
--- Statusline, themed from the matugen palette so it matches the bar and kitty.
+-- Statusline, themed from the Catppuccin palette so it matches the bar and kitty.
 return {
   "nvim-lualine/lualine.nvim",
   dependencies = { "nvim-tree/nvim-web-devicons" },
   config = function()
-    -- Build a lualine theme from the wallpaper palette (pcall for first run).
-    local ok, c = pcall(require, "matugen-colors")
+    -- Build a lualine theme from the fixed palette (pcall + inline fallback).
+    local ok, c = pcall(require, "theme-colors")
     if not ok then
-      c = { primary = "#ffb2b9", secondary = "#e5bdbf", tertiary = "#e8c08e",
-            on_surface = "#f0dedf", on_surface_variant = "#c8c8ce", outline = "#6e6e76" }
+      c = { primary = "#f5c2e7", secondary = "#cba6f7", tertiary = "#b4befe",
+            on_surface = "#cdd6f4", on_surface_variant = "#a6adc8", outline = "#585b70" }
     end
     local bg, bg_alt, black = "#0f0f11", "#1e1e22", "#0b0b0d"
 

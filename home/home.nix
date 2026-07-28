@@ -6,7 +6,6 @@
   home.stateVersion = "26.05";   # <-- match system.stateVersion in configuration.nix
   home.packages = with pkgs; [
     kitty
-    matugen
     awww
     brave
     claude-code
@@ -20,6 +19,7 @@
     grim                     # screenshots (Print binds)
     slurp                    # region select for screenshots
     wl-clipboard             # wl-copy — screenshots to clipboard
+    imagemagick              # `magick` — generates the wallpaper-picker thumbnails (Super+W)
     brightnessctl
     swaynotificationcenter   # swaync — animated notifications + notification center
     hyprlock                 # the Lain lockscreen (CRT shader, pink input)
@@ -36,7 +36,7 @@
     # zsh-syntax-highlighting are provided by programs.zsh.* in configuration.nix
     # (loaded via /etc/zshrc), so they're not listed here.
     zsh
-    starship              # prompt (matugen-themed)
+    starship              # prompt (Catppuccin Mocha)
     fzf                   # Ctrl-R history / Ctrl-T files
     eza                   # modern ls
     bat                   # cat with syntax highlighting
@@ -55,10 +55,10 @@
     XCURSOR_SIZE = "20";
   };
 
-  # Out-of-store symlinks: live repo files (hot-reload + matugen can write them).
-  # hyprland.conf is matugen-generated from hyprland.conf.in (pink border tracks
-  # the wallpaper). Hyprland's search path is ~/.config/hypr, so this drops in
-  # alongside hyprlock/hypridle and is a straight copy to Arch.
+  # Out-of-store symlinks: live repo files (edited in place, hot-reloaded).
+  # hyprland.conf carries the Catppuccin colours inline. Hyprland's search path is
+  # ~/.config/hypr, so this drops in alongside hyprlock/hypridle and is a straight
+  # copy to Arch.
   xdg.configFile."hypr/hyprland.conf".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/hypr/hyprland.conf";
 
@@ -75,7 +75,7 @@
 
   # hyprlock + hypridle (kept in dotfiles/hypr/ — hyprlock's default search path
   # is ~/.config/hypr, so this is a straight copy to Arch). The .frag is the CRT
-  # shader (static); hyprlock.conf is matugen-generated from hyprlock.conf.in.
+  # shader (static); hyprlock.conf carries the Catppuccin colours inline.
   xdg.configFile."hypr/hyprlock.conf".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/hypr/hyprlock.conf";
   xdg.configFile."hypr/hyprlock.frag".source =
@@ -100,7 +100,7 @@
   xdg.configFile."fastfetch/config.jsonc".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/fastfetch/config.jsonc";
 
-  # wlogout power menu (Super+L): layout (the buttons) + matugen-generated style.css.
+  # wlogout power menu (Super+L): layout (the buttons) + Catppuccin style.css.
   xdg.configFile."wlogout/layout".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/wlogout/layout";
   xdg.configFile."wlogout/style.css".source =

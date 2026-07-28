@@ -29,5 +29,5 @@ require("lazy").setup({
   checker = { enabled = false }, -- don't nag about plugin updates
 })
 
--- Apply the matugen-derived theme LAST so it overrides plugin defaults.
+-- Apply the Catppuccin theme LAST so it overrides plugin defaults.
 require("theme").apply()

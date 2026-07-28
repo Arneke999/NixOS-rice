@@ -1,6 +1,6 @@
-/* swaync — themed from matugen (generated from style.css.in).
-   Near-black fixed background + wallpaper-derived pink accent. Critical urgency
-   uses a PINNED red (never the wallpaper palette), matching the mako lesson. */
+/* swaync — Catppuccin Mocha (pink accent), static.
+   Near-black fixed background + Catppuccin pink accent. Critical urgency uses a
+   PINNED red, matching the mako lesson. */
 
 * {
   font-family: "JetBrainsMono Nerd Font", sans-serif;
@@ -23,7 +23,7 @@
 }
 
 .notification-row .notification-background .notification.critical {
-  border: 2px solid #ff5555;
+  border: 2px solid #f38ba8;
 }
 
 .notification-row .notification-background .notification .notification-content {
@@ -31,43 +31,43 @@
 }
 
 .summary {
-  color: #ffb2b9;
+  color: #f5c2e7;
   font-weight: bold;
 }
 
 .time {
-  color: #e8c08e;
+  color: #b4befe;
   font-size: 11px;
 }
 
 .body {
-  color: #d7c1c2;
+  color: #a6adc8;
 }
 
 /* Close (X) button */
 .notification-row .close-button {
   background: transparent;
-  color: #9f8c8d;
+  color: #585b70;
   border-radius: 8px;
   margin: 6px;
   padding: 2px 6px;
 }
 .notification-row .close-button:hover {
-  background: #ffb2b9;
+  background: #f5c2e7;
   color: #0f0f11;
 }
 
 /* Inline action buttons */
 .notification-action {
   background: #16161a;
-  color: #f0dedf;
+  color: #cdd6f4;
   border: 1px solid #1e1e22;
   border-radius: 8px;
   margin: 4px;
   padding: 4px 8px;
 }
 .notification-action:hover {
-  background: #ffb2b9;
+  background: #f5c2e7;
   color: #0f0f11;
 }
 
@@ -78,7 +78,7 @@ progressbar, trough {
 }
 progressbar progress {
   border-radius: 8px;
-  background: #ffb2b9;
+  background: #f5c2e7;
 }
 
 /* ── Control center (notification history panel) ────────────────────────── */
@@ -94,25 +94,25 @@ progressbar progress {
 }
 
 .widget-title {
-  color: #f0dedf;
+  color: #cdd6f4;
   font-weight: bold;
   font-size: 15px;
   margin: 4px 4px 10px 4px;
 }
 .widget-title > button {
   background: #16161a;
-  color: #f0dedf;
+  color: #cdd6f4;
   border: 1px solid #1e1e22;
   border-radius: 8px;
   padding: 2px 10px;
 }
 .widget-title > button:hover {
-  background: #ffb2b9;
+  background: #f5c2e7;
   color: #0f0f11;
 }
 
 .widget-dnd {
-  color: #f0dedf;
+  color: #cdd6f4;
   margin: 6px 4px;
 }
 .widget-dnd > switch {
@@ -121,10 +121,10 @@ progressbar progress {
   border: 1px solid #1e1e22;
 }
 .widget-dnd > switch:checked {
-  background: #ffb2b9;
+  background: #f5c2e7;
 }
 .widget-dnd > switch slider {
-  background: #f0dedf;
+  background: #cdd6f4;
   border-radius: 12px;
 }
 
@@ -135,7 +135,7 @@ progressbar progress {
 }
 .widget-buttons-grid > flowbox > flowboxchild > button {
   background: #16161a;
-  color: #d7c1c2;
+  color: #a6adc8;
   border: 1px solid #1e1e22;
   border-radius: 12px;
   margin: 4px;
@@ -146,7 +146,7 @@ progressbar progress {
   background: #1e1e22;
 }
 .widget-buttons-grid > flowbox > flowboxchild > button.toggle:checked {
-  background: #ffb2b9;
+  background: #f5c2e7;
   color: #0f0f11;
 }
 
@@ -157,7 +157,7 @@ progressbar progress {
   border-radius: 12px;
   padding: 8px 12px;
   margin: 8px 4px;
-  color: #f0dedf;
+  color: #cdd6f4;
 }
 .widget-volume trough, .widget-backlight trough {
   background: #1e1e22;
@@ -166,11 +166,11 @@ progressbar progress {
 }
 .widget-volume highlight, .widget-backlight highlight,
 .widget-volume progress, .widget-backlight progress {
-  background: #ffb2b9;
+  background: #f5c2e7;
   border-radius: 12px;
 }
 .widget-volume slider, .widget-backlight slider {
-  background: #f0dedf;
+  background: #cdd6f4;
   border-radius: 50%;
   min-width: 14px;
   min-height: 14px;
@@ -183,10 +183,10 @@ progressbar progress {
   border-radius: 12px;
   margin: 8px 4px;
   padding: 8px;
-  color: #f0dedf;
+  color: #cdd6f4;
 }
-.widget-mpris-title { font-weight: bold; color: #ffb2b9; }
-.widget-mpris-subtitle { color: #d7c1c2; }
+.widget-mpris-title { font-weight: bold; color: #f5c2e7; }
+.widget-mpris-subtitle { color: #a6adc8; }
 
 .blank-window {
   background: transparent;

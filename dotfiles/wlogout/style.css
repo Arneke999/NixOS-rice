@@ -1,37 +1,41 @@
-/* wlogout — the Lain power menu (Super+L). Just a row of glyphs (no boxes, no
-   labels) over a dimmed desktop; the hovered/focused one lights up pink. Escape
-   or Super+L again closes it. Matugen-templated: the accent tracks the wallpaper.
-   Edit style.css.in, NOT the generated style.css. */
+/* wlogout — the Lain power menu (Super+L). A row of glyphs over a dimmed desktop;
+   the mouse-hovered one lights up pink. Escape or Super+L closes it.
+   Catppuccin Mocha (pink accent), static — edit the hexes here directly. */
 
 * {
   font-family: "JetBrainsMono Nerd Font";
-  color: #6a6a70;              /* muted glyphs at rest */
   background-image: none;      /* drop wlogout's default icon images — glyphs only */
   background-color: transparent;
   border: none;
   box-shadow: none;
   text-shadow: none;
   outline: none;
-  transition: color 0.18s ease;
+  transition: color 150ms ease, background-color 150ms ease;
 }
 
-/* Dim the desktop behind the row. */
+/* Dim the whole desktop behind the row. */
 window {
   background-color: rgba(10, 10, 11, 0.85);
 }
 
-/* Each action is a bare glyph; margin spaces them out on the single row. */
+/* Compact buttons pushed to the vertical middle with big top/bottom margins (tuned
+   to the 1200px eDP panel — wlogout won't vertically centre a short row on its own,
+   and forcing full-height buttons pushes the glyph off-screen). The margin keeps the
+   button small, so the hover highlight is a neat pill around the glyph, not a full
+   column. Left/right margin = the gap between icons. Theme colour at rest. */
 button {
-  font-size: 56px;
-  margin: 0 26px;
-  padding: 0;
-  min-width: 96px;
-  min-height: 96px;
-  color: #6a6a70;
+  color: #cba6f7;
+  font-size: 44px;
+  min-height: 64px;
+  margin: 265px 10px 500px 10px;  /* top / L-R / bottom / — asymmetric to raise the row */
+  padding: 12px 20px;
+  border-radius: 20px;
+  background-color: transparent;
 }
 
-button:focus,
-button:hover,
-button:active {
-  color: #ffb2b9;
+/* ONLY the mouse-hovered button reacts — `:hover` alone (NOT `:focus`), so the
+   button wlogout auto-focuses on open (lock) no longer stays highlighted. */
+button:hover {
+  color: #f5c2e7;
+  background-color: alpha(#f5c2e7, 0.15);
 }

@@ -1,11 +1,10 @@
 -- ── theme.lua ────────────────────────────────────────────────────────────────
--- A fully wallpaper-driven colorscheme. Every foreground/accent comes from the
--- matugen palette (lua/matugen-colors.lua, regenerated on each wallpaper change).
--- Only the BACKGROUND ramp is pinned near-black so nvim matches kitty and the
--- rest of the rice (the "fixed background" rule).
+-- Catppuccin Mocha colorscheme (pink accent). Every foreground/accent comes from
+-- the fixed palette (lua/theme-colors.lua). The BACKGROUND ramp is pinned near-black
+-- so nvim matches kitty and the rest of the rice (the "fixed background" rule).
 --
--- ⚠️ MUDDY-COLOUR ESCAPE HATCH: because the palette is near-monochrome, git and
--- diagnostic colours below can be hard to tell apart. If that bothers you, flip
+-- ⚠️ MUDDY-COLOUR ESCAPE HATCH: git and diagnostic colours below share the accent
+-- family and can be hard to tell apart. If that bothers you, flip
 -- `local semantic = false` to `true` to use fixed red/green/yellow for those
 -- groups only (everything else stays wallpaper-driven).
 local semantic = false
@@ -13,14 +12,14 @@ local semantic = false
 local M = {}
 
 function M.apply()
-  -- Fallback palette (used before the first matugen render exists).
-  local ok, c = pcall(require, "matugen-colors")
+  -- Palette (Catppuccin Mocha, pink accent); inline fallback if the module is missing.
+  local ok, c = pcall(require, "theme-colors")
   if not ok then
     c = {
-      primary = "#ffb2b9", on_primary = "#0f0f11", primary_container = "#5a2b34",
-      secondary = "#e5bdbf", tertiary = "#e8c08e", error = "#ffb4ab",
-      on_surface = "#f0dedf", on_surface_variant = "#c8c8ce",
-      surface_variant = "#2a2a30", outline = "#6e6e76",
+      primary = "#f5c2e7", on_primary = "#11111b", primary_container = "#313244",
+      secondary = "#cba6f7", tertiary = "#b4befe", error = "#f38ba8",
+      on_surface = "#cdd6f4", on_surface_variant = "#a6adc8",
+      surface_variant = "#45475a", outline = "#585b70",
     }
   end
 
@@ -42,7 +41,7 @@ function M.apply()
   vim.o.background = "dark"
   vim.cmd.highlight("clear")
   if vim.g.colors_name then vim.cmd.highlight("clear") end
-  vim.g.colors_name = "matugen"
+  vim.g.colors_name = "catppuccin-mocha"
 
   local hl = function(group, spec) vim.api.nvim_set_hl(0, group, spec) end
 

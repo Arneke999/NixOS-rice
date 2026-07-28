@@ -1,9 +1,21 @@
 #!/usr/bin/env bash
-# Set wallpaper (awww) -> regenerate palette (matugen) -> reload. Arg: wallpaper path.
+# Set the wallpaper (awww) and remember it. Arg: wallpaper path (optional).
+# The rice's colours are a fixed Catppuccin palette now, so this no longer re-themes
+# anything — it just swaps the image and keeps ~/.cache/wallpaper pointed at it.
 set -euo pipefail
 
 REPO="${NIX_CONFIG_REPO:-$HOME/nix-config}"
-WALL="${1:-$REPO/wallpapers/lain.jpg}"
+
+# Wallpaper to apply: explicit arg wins; otherwise restore the last-chosen one
+# (~/.cache/wallpaper, written below on every change) so a reboot keeps your pick;
+# fall back to the default only on a fresh machine that has never set one.
+if [ -n "${1:-}" ]; then
+  WALL="$1"
+elif [ -e "$HOME/.cache/wallpaper" ]; then
+  WALL="$(readlink -f "$HOME/.cache/wallpaper")"
+else
+  WALL="$REPO/wallpapers/lain.jpg"
+fi
 
 [ -f "$WALL" ] || { echo "no such wallpaper: $WALL" >&2; exit 1; }
 
@@ -21,16 +33,8 @@ awww img "$WALL" --resize crop \
   --transition-duration 1.1 \
   --transition-fps 60 \
   --transition-bezier 0.22,1,0.36,1
-matugen image "$WALL" --prefer saturation --mode dark -c "$REPO/dotfiles/matugen/config.toml"
 
 # Keep a stable path for hyprlock's background so the lockscreen always matches
 # the live desktop wallpaper (hyprlock reads ~/.cache/wallpaper).
 mkdir -p "$HOME/.cache"
 ln -sf "$WALL" "$HOME/.cache/wallpaper"
-
-eww reload >/dev/null 2>&1 || true
-swaync-client --reload-css >/dev/null 2>&1 || true
-# kitty reloads config on SIGUSR1. Match both the plain name (Arch) and the
-# NixOS wrapper name (.kitty-wrapped). kitty also auto-watches its config, so
-# this is mostly belt-and-suspenders.
-pkill -USR1 -x '\.?kitty(-wrapped)?' >/dev/null 2>&1 || true

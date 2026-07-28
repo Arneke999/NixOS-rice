@@ -23,9 +23,16 @@
   color: #55555b;
 }
 .ws-dot.empty   { color: #3a3a40; }
-.ws-dot.focused { color: #ffb2b9; }
+.ws-dot.focused { color: #f5c2e7; }
+// A window opened in this (unfocused) workspace — pulse the theme pink a few times.
+.ws-dot.blink   { animation: ws-blink 0.42s ease-in-out 3; }
+@keyframes ws-blink {
+  0%   { color: #f5c2e7; }
+  50%  { color: #3a3a40; }
+  100% { color: #f5c2e7; }
+}
 
-.clock label { color: #ffb2b9; }
+.clock label { color: #f5c2e7; }
 
 .metrics label { padding: 0 6px; }
 
@@ -35,27 +42,27 @@
   margin: 0 5px;
   background-color: #2a2a30;
 }
-.ring.cpu { color: #ffb2b9; }
-.ring.ram { color: #e8c08e; }
-.ring.bat { color: #e5bdbf; }
+.ring.cpu { color: #f5c2e7; }
+.ring.ram { color: #b4befe; }
+.ring.bat { color: #cba6f7; }
 .ring.bat.charging { color: #7fd6a0; }
-.ring.bat.low { color: #ff5555; }
+.ring.bat.low { color: #f38ba8; }
 .ring-icon { font-size: 13px; color: #8a8a90; }
 
 .vol,
 .net,
 .bri,
 .bat,
-.date { color: #e5bdbf; }
+.date { color: #cba6f7; }
 
 // Battery is now a plain icon + % label (was a ring): colour signals the state.
 .bat.charging { color: #7fd6a0; }
-.bat.plugged  { color: #e5bdbf; }
-.bat.low      { color: #ff5555; }
+.bat.plugged  { color: #cba6f7; }
+.bat.low      { color: #f38ba8; }
 
 .bt { color: #8a8a90; }
-.bt.on { color: #e5bdbf; }
-.bt.connected { color: #ffb2b9; }
+.bt.on { color: #cba6f7; }
+.bt.connected { color: #f5c2e7; }
 
 // Click-away backdrop behind popups — a real (near-invisible) surface so it
 // still catches pointer events; not fully transparent, which some GTK builds
@@ -77,14 +84,14 @@ tooltip label {
   color: #c8c8ce;
   padding: 4px;
 }
-.cal-pop calendar:selected { color: #ffb2b9; }
-.cal-pop calendar.header { color: #ffb2b9; }
+.cal-pop calendar:selected { color: #f5c2e7; }
+.cal-pop calendar.header { color: #f5c2e7; }
 
 // ── popups (brightness / audio / wifi / bluetooth) ────────────────
 .popup { padding: 14px 16px; }
-.popup-title { color: #ffb2b9; font-size: 13px; }
+.popup-title { color: #f5c2e7; font-size: 13px; }
 .popup-sub   { color: #8a8a90; font-size: 12px; }
-.popup-icon  { color: #e5bdbf; font-size: 18px; }
+.popup-icon  { color: #cba6f7; font-size: 18px; }
 .popup-icon-btn { padding: 0 2px; }
 .popup-val   { color: #c8c8ce; font-size: 12px; min-width: 40px; }
 
@@ -96,7 +103,7 @@ scale trough {
   min-width: 120px;
 }
 scale trough highlight {
-  background-color: #ffb2b9;
+  background-color: #f5c2e7;
   border-radius: 12px;
 }
 scale slider {
@@ -109,7 +116,7 @@ scale slider {
 
 // on/off pill toggles + list rows + launcher button.
 .toggle { padding: 2px 14px; border-radius: 10px; }
-.toggle.on  { background-color: #ffb2b9; color: #0f0f11; }
+.toggle.on  { background-color: #f5c2e7; color: #0f0f11; }
 .toggle.off { background-color: #2a2a30; color: #8a8a90; }
 
 .bt-dev {
@@ -119,7 +126,8 @@ scale slider {
   background-color: transparent;
 }
 .bt-dev:hover { background-color: #1a1a1f; }
-.bt-dev.connected { color: #ffb2b9; }
+.bt-dev.connected { color: #f5c2e7; }
+.wifi-lock { color: #6a6a70; font-size: 11px; }   // lock glyph / "pair" hint on a row
 
 .popup-manage {
   padding: 6px;
