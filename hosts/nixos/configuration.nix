@@ -4,6 +4,58 @@
 
 { config, lib, pkgs, username, ... }:
 
+let
+  # SDDM greeter theme: sddm-astronaut (Qt6/QML) themed to the rice — near-black
+  # surfaces, pink accents, the lain wallpaper blurred + dimmed. Colours live here;
+  # it's un-previewable until the greeter renders at boot, so iterate from there.
+  # Keys are the theme's own (PascalCase) options, written into its [General] conf.
+  sddm-astronaut = pkgs.sddm-astronaut.override {
+    embeddedTheme = "astronaut";
+    themeConfig = {
+      Background = "${../../wallpapers/lain.jpg}";
+      CropBackground = true;
+      DimBackground = "0.45";
+      FullBlur = true;
+      Blur = "1.7";
+      ScreenPadding = "0";
+      Font = "JetBrainsMono Nerd Font";
+      FormPosition = "center";
+      HaveFormBackground = true;
+      HideVirtualKeyboard = true;
+      PasswordFocus = true;
+      # Near-black surfaces.
+      BackgroundColor = "#0a0a0b";
+      FormBackgroundColor = "#0f0f11";
+      DimBackgroundColor = "#0a0a0b";
+      # Text.
+      HeaderTextColor = "#e8e8ee";
+      DateTextColor = "#8a8a90";
+      TimeTextColor = "#e8e8ee";
+      PlaceholderTextColor = "#8a8a90";
+      # Input fields (pink icons).
+      LoginFieldBackgroundColor = "#17171a";
+      PasswordFieldBackgroundColor = "#17171a";
+      LoginFieldTextColor = "#e8e8ee";
+      PasswordFieldTextColor = "#e8e8ee";
+      UserIconColor = "#ffb2b9";
+      PasswordIconColor = "#ffb2b9";
+      HoverUserIconColor = "#ffc9ce";
+      HoverPasswordIconColor = "#ffc9ce";
+      # Login button = pink; power icons muted.
+      LoginButtonBackgroundColor = "#ffb2b9";
+      LoginButtonTextColor = "#0f0f11";
+      SystemButtonsIconsColor = "#8a8a90";
+      # Highlights + dropdowns (session / user pickers).
+      HighlightTextColor = "#0f0f11";
+      HighlightBackgroundColor = "#ffb2b9";
+      HighlightBorderColor = "#ffb2b9";
+      DropdownBackgroundColor = "#0f0f11";
+      DropdownTextColor = "#e8e8ee";
+      DropdownSelectedBackgroundColor = "#ffb2b9";
+      WarningColor = "#ff5555";
+    };
+  };
+in
 {
   imports =
     [ # Include the results of the hardware scan.
@@ -85,47 +137,72 @@
   # since a greetd-spawned session doesn't source the shell profile.
   # environment.sessionVariables.AQ_NO_ATOMIC = "1";
 
-  # Boot login: ReGreet — a graphical greetd greeter (GTK4 / libadwaita). This is a
-  # REAL pre-session login: you authenticate at a proper greeter before Hyprland
-  # ever starts. It replaces the old autologin→hyprlock gate, which was only
-  # acceptable while the disk was LUKS-encrypted — now that the drive is NOT
-  # encrypted, autologin-into-a-lock is no longer a real auth boundary (anything
-  # that stopped hyprlock would drop straight into a live session). hyprlock stays
-  # for idle-lock (hypridle) and the manual Super+Alt+L bind.
-  #
-  # ReGreet runs inside a `cage` kiosk compositor (pulled in automatically), and
-  # programs.regreet.enable configures services.greetd for us — so we no longer set
-  # default_session by hand.
-  programs.regreet = {
+  # Boot login: SDDM (Qt6) with the sddm-astronaut theme, themed to the rice via the
+  # `sddm-astronaut` binding at the top of this file. Replaced ReGreet — libadwaita
+  # capped how far that greeter could be pushed; SDDM's Qt6/QML theme matches the
+  # Lain look (blurred wallpaper, big clock, pink accents) properly. Still a REAL
+  # pre-session login (authenticates before Hyprland starts) — the security boundary
+  # we need on an unencrypted drive. hyprlock stays for idle-lock (hypridle) + the
+  # manual Super+Alt+L bind.
+  # The greeter runs on WAYLAND, not X11. First attempt used an X11 greeter and it
+  # FROZE after auth: on the VT switch to the Hyprland session the X server never
+  # cleanly released DRM master, so Hyprland never started, and the X greeter then
+  # SIGABRT'd in its xcb platform init (`init_platform` → qFatal). A Wayland greeter
+  # hands DRM off cleanly to a Wayland session — the exact path ReGreet/greetd used
+  # to work. (No services.xserver needed; XWayland for apps comes from Hyprland.)
+  services.displayManager.sddm = {
+    enable = true;
+    wayland.enable = true;             # THE fix — Wayland greeter, clean DRM handoff
+    package = pkgs.kdePackages.sddm;   # Qt6 SDDM — the theme is Qt6/QML
+    theme = "sddm-astronaut-theme";
+    extraPackages = [ sddm-astronaut ];
+  };
+  # Default to the plain Hyprland session (start-hyprland — the launch path ReGreet
+  # used successfully), NOT the uwsm-managed one, to avoid a second variable.
+  services.displayManager.defaultSession = "hyprland";
+
+  # ── Power management (laptop): TLP + thermald ────────────────────────────────
+  # Max battery WITHOUT visible perf loss: full turbo + performance EPP on AC; on
+  # battery drop EPP to balance_power and lean on the "invisible" savings (PCIe
+  # ASPM, runtime PM, platform low-power) but KEEP turbo so bursts stay instant.
+  # intel_pstate "powersave" still scales to max under load — not a fixed-low clock.
+  services.power-profiles-daemon.enable = false;   # must be off — conflicts with TLP
+  services.thermald.enable = true;                 # Intel thermal daemon (anti-throttle)
+  services.tlp = {
     enable = true;
     settings = {
-      # The greeter runs as the unprivileged `greeter` user, which can't read
-      # /home/lain, so point at the wallpaper straight from the repo — Nix copies
-      # it into the world-readable store. Fixed image (like the Plymouth splash):
-      # the login screen predates knowing the live desktop wallpaper.
-      background = {
-        path = "${../../wallpapers/lain.jpg}";
-        fit = "Cover";
-      };
-      GTK.application_prefer_dark_theme = true;
+      CPU_SCALING_GOVERNOR_ON_AC    = "performance";
+      CPU_SCALING_GOVERNOR_ON_BAT   = "powersave";
+      CPU_ENERGY_PERF_POLICY_ON_AC  = "performance";
+      CPU_ENERGY_PERF_POLICY_ON_BAT = "balance_power";
+      CPU_BOOST_ON_AC  = 1;
+      CPU_BOOST_ON_BAT = 1;               # keep turbo on battery → no visible perf loss
+      PLATFORM_PROFILE_ON_AC  = "performance";
+      PLATFORM_PROFILE_ON_BAT = "low-power";
+      PCIE_ASPM_ON_BAT  = "powersupersave";
+      RUNTIME_PM_ON_BAT = "auto";
+      USB_AUTOSUSPEND = 1;
+      # Optional Li-ion longevity (uncomment if the EC supports charge limits):
+      # START_CHARGE_THRESH_BAT0 = 75;
+      # STOP_CHARGE_THRESH_BAT0  = 80;
     };
-    theme       = { name = "adw-gtk3-dark";         package = pkgs.adw-gtk3; };
-    iconTheme   = { name = "Papirus-Dark";          package = pkgs.papirus-icon-theme; };
-    cursorTheme = { name = "Bibata-Modern-Classic"; package = pkgs.bibata-cursors; };
-    font        = { name = "Inter"; size = 12;      package = pkgs.inter; };
-    # Pink accent to match the rice (ReGreet is libadwaita — theme via accent color).
-    extraCss = ''
-      @define-color accent_color #ffb2b9;
-      @define-color accent_bg_color #ffb2b9;
-    '';
   };
 
-  # ReGreet lists sessions from the system's wayland-sessions dir, which is empty
-  # unless a package's session file is registered here (autologin never needed one).
-  # Expose Hyprland's session file — it launches the correct `start-hyprland`
-  # wrapper — so "Hyprland" appears in, and can actually be launched from, the
-  # greeter. Without this you'd boot into a greeter with no session to start.
-  services.displayManager.sessionPackages = [ config.programs.hyprland.package ];
+  # Expose ONLY the plain Hyprland session (Exec = start-hyprland), NOT the
+  # `hyprland-uwsm.desktop` the hyprland package ALSO ships. That UWSM session runs
+  # `uwsm start`, which needs UWSM's systemd user units — but programs.uwsm.enable is
+  # false, so it fails ("wayland-session-bindpid@… exit 5") → black screen after login.
+  # The plain start-hyprland is exactly what ReGreet launched successfully. Session
+  # packages must declare passthru.providedSessions, so we wrap a one-file copy.
+  services.displayManager.sessionPackages = [
+    (pkgs.runCommand "hyprland-plain-session" {
+      passthru.providedSessions = [ "hyprland" ];
+    } ''
+      mkdir -p "$out/share/wayland-sessions"
+      cp ${config.programs.hyprland.package}/share/wayland-sessions/hyprland.desktop \
+         "$out/share/wayland-sessions/"
+    '')
+  ];
 
   # Zsh as the login shell (adds it to /etc/shells, sets up /etc/zshrc).
   # The actual interactive config is the raw ~/.zshrc symlinked by Home Manager.
@@ -199,6 +276,7 @@
      packages = with pkgs; [
        tree 
        git
+       vscodium
      ];
    };
 
@@ -213,6 +291,7 @@
     wget
     xdg-user-dirs
     bluez # bluetoothctl for the eww bluetooth widget
+    sddm-astronaut # SDDM greeter theme (also in sddm.extraPackages; here so it's on the system profile)
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

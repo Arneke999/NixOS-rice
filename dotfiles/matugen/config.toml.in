@@ -43,3 +43,11 @@ output_path = "@HOME@/nix-config/dotfiles/fastfetch/config.jsonc"
 [templates.starship]
 input_path = "@HOME@/nix-config/dotfiles/starship/starship.toml.in"
 output_path = "@HOME@/nix-config/dotfiles/starship/starship.toml"
+
+[templates.wlogout]
+input_path = "@HOME@/nix-config/dotfiles/wlogout/style.css.in"
+output_path = "@HOME@/nix-config/dotfiles/wlogout/style.css"
+
+[templates.fuzzel-picker]
+input_path = "@HOME@/nix-config/dotfiles/fuzzel/picker.ini.in"
+output_path = "@HOME@/nix-config/dotfiles/fuzzel/picker.ini"

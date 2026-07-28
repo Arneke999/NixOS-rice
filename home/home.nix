@@ -24,6 +24,7 @@
     swaynotificationcenter   # swaync — animated notifications + notification center
     hyprlock                 # the Lain lockscreen (CRT shader, pink input)
     hypridle                 # idle -> lock (drives lock via logind for Niri)
+    wlogout                  # power menu (Super+L): lock/logout/suspend/reboot/shutdown
     neovim                   # Neovim tooling (installed via Nix, NOT mason — mason binaries break on NixOS):
     lua-language-server   # lua_ls
     nixd                  # Nix LSP
@@ -44,7 +45,7 @@
     papirus-icon-theme
     bibata-cursors
     inter
-    vscodium
+    firefox
   ];
 
   fonts.fontconfig.enable = true;
@@ -98,6 +99,12 @@
 
   xdg.configFile."fastfetch/config.jsonc".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/fastfetch/config.jsonc";
+
+  # wlogout power menu (Super+L): layout (the buttons) + matugen-generated style.css.
+  xdg.configFile."wlogout/layout".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/wlogout/layout";
+  xdg.configFile."wlogout/style.css".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/wlogout/style.css";
 
   home.file.".zshrc".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/zsh/.zshrc";

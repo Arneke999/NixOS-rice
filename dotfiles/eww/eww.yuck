@@ -3,7 +3,7 @@
 (defpoll date_str :interval "1h"  `date "+%a %d %b"`)
 (defpoll volume     :interval "1s"  :initial '{"muted":false,"value":0}'                             "~/nix-config/dotfiles/eww/scripts/volume.sh")
 (defpoll net        :interval "5s"  :initial '{"icon":"","detail":""}'                               "~/nix-config/dotfiles/eww/scripts/net.sh")
-(defpoll battery    :interval "10s" :initial '{"present":false,"capacity":0,"status":"none","icon":"󰂑"}' "~/nix-config/dotfiles/eww/scripts/battery.sh")
+(defpoll battery    :interval "10s" :initial '{"present":false,"capacity":0,"status":"none","charging":false,"plugged":false,"icon":"󰂑","time":""}' "~/nix-config/dotfiles/eww/scripts/battery.sh")
 (defpoll brightness :interval "3s"  :initial '{"present":false,"value":0}'                           "~/nix-config/dotfiles/eww/scripts/brightness.sh")
 (defpoll bluetooth  :interval "5s"  :initial '{"present":false,"powered":false,"connected":false}'   "~/nix-config/dotfiles/eww/scripts/bluetooth.sh")
 (defpoll wifi       :interval "10s" :initial '{"enabled":false,"ssid":"","signal":0}'                "~/nix-config/dotfiles/eww/scripts/wifi.sh")
@@ -65,7 +65,7 @@
 
     ;; Battery — clear icon + %, glyph reflects level, colour reflects charge state.
     (box :class "bat-box" :visible {battery.present}
-         :tooltip "battery  ${battery.capacity}%  ·  ${battery.status}"
+         :tooltip "battery  ${battery.capacity}%  ·  ${battery.status}${battery.time != "" ? "  ·  " + battery.time : ""}"
       (label :class {battery.charging ? "bat charging" :
                      battery.plugged  ? "bat plugged" :
                      battery.capacity <= 15 ? "bat low" : "bat"}

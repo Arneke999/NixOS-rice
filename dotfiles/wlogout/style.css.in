@@ -1,0 +1,37 @@
+/* wlogout — the Lain power menu (Super+L). Just a row of glyphs (no boxes, no
+   labels) over a dimmed desktop; the hovered/focused one lights up pink. Escape
+   or Super+L again closes it. Matugen-templated: the accent tracks the wallpaper.
+   Edit style.css.in, NOT the generated style.css. */
+
+* {
+  font-family: "JetBrainsMono Nerd Font";
+  color: #6a6a70;              /* muted glyphs at rest */
+  background-image: none;      /* drop wlogout's default icon images — glyphs only */
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  text-shadow: none;
+  outline: none;
+  transition: color 0.18s ease;
+}
+
+/* Dim the desktop behind the row. */
+window {
+  background-color: rgba(10, 10, 11, 0.85);
+}
+
+/* Each action is a bare glyph; margin spaces them out on the single row. */
+button {
+  font-size: 56px;
+  margin: 0 26px;
+  padding: 0;
+  min-width: 96px;
+  min-height: 96px;
+  color: #6a6a70;
+}
+
+button:focus,
+button:hover,
+button:active {
+  color: {{colors.primary.default.hex}};
+}

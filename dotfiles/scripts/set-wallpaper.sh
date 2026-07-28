@@ -12,7 +12,15 @@ if ! awww query >/dev/null 2>&1; then
   until awww query >/dev/null 2>&1; do sleep 0.1; done
 fi
 
-awww img "$WALL" --resize crop
+# Swap with a soft growing-circle reveal (the "animation"). --resize crop keeps
+# the image filling the screen; the transition only plays when the image changes,
+# so the login set-up is effectively instant. Tune type/duration to taste
+# (types: fade | grow | center | wipe | wave | left/right/top/bottom | any).
+awww img "$WALL" --resize crop \
+  --transition-type center \
+  --transition-duration 1.1 \
+  --transition-fps 60 \
+  --transition-bezier 0.22,1,0.36,1
 matugen image "$WALL" --prefer saturation --mode dark -c "$REPO/dotfiles/matugen/config.toml"
 
 # Keep a stable path for hyprlock's background so the lockscreen always matches
