@@ -169,6 +169,11 @@ in
       CursorTheme = "Bibata-Modern-Classic";
       CursorSize = 24;
     };
+    # Belt-and-suspenders for the missing pointer: also inject the cursor into the
+    # greeter's environment. The Qt/QML theme reads [Theme] CursorTheme, but the
+    # Wayland greeter compositor picks the pointer up from XCURSOR_* — set both so a
+    # visible cursor shows at the login screen (no more Tab-only navigation).
+    settings.General.GreeterEnvironment = "XCURSOR_THEME=Bibata-Modern-Classic,XCURSOR_SIZE=24";
   };
   # Default to the plain Hyprland session (start-hyprland — the launch path ReGreet
   # used successfully), NOT the uwsm-managed one, to avoid a second variable.
@@ -239,8 +244,10 @@ in
   nixpkgs.config.allowUnfree = true;
 
   # Bluetooth (provides bluetoothctl; eww bar has a toggle widget).
+  # powerOnBoot = false → the adapter starts OFF each boot; toggle it on from the
+  # eww bar (middle-click the BT icon) or bluetoothctl when you actually need it.
   hardware.bluetooth.enable = true;
-  hardware.bluetooth.powerOnBoot = true;
+  hardware.bluetooth.powerOnBoot = false;
 
   # Audio
   security.rtkit.enable = true;

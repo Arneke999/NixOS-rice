@@ -37,8 +37,12 @@
 .metrics label { padding: 0 6px; }
 
 .ring {
-  min-width: 32px;
-  min-height: 32px;
+  // Diameter = min(width, height), and height is capped by the bar (:height 46px in
+  // eww.yuck) minus `.bar` padding — so raising these past ~34px does nothing to the
+  // circle (that's why 32 vs 64 look identical). Enlarging the pies means enlarging
+  // the bar too; left as-is by choice.
+  min-width: 64px;
+  min-height: 64px;
   margin: 0 5px;
   background-color: #2a2a30;
 }
