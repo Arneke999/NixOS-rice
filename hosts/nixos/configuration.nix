@@ -158,21 +158,20 @@ in
   services.displayManager.sddm = {
     enable = true;
     wayland.enable = true;             # THE fix — Wayland greeter, clean DRM handoff
+    # THE cursor fix. The default Wayland greeter compositor is weston (--shell=kiosk),
+    # whose NixOS-generated weston.ini has NO cursor config, so it draws no pointer —
+    # that's why the login screen had no cursor (Tab-only). kwin_wayland always renders
+    # a real cursor (and honours the theme/XCURSOR_* below), so switch to it.
+    wayland.compositor = "kwin";
     package = pkgs.kdePackages.sddm;   # Qt6 SDDM — the theme is Qt6/QML
     theme = "sddm-astronaut-theme";
     extraPackages = [ sddm-astronaut ];
-    # The greeter runs as the `sddm` user under weston, so the home-session
-    # XCURSOR_THEME never reaches it → no visible pointer (had to Tab around).
-    # SDDM exports these to the greeter's cursor; the theme itself is on the system
-    # profile below (bibata-cursors) so weston can find it in the icon search path.
+    # Cursor theme for the greeter (kwin reads [Theme] CursorTheme + XCURSOR_*); the
+    # theme itself is on the system profile below (bibata-cursors) so kwin finds it.
     settings.Theme = {
       CursorTheme = "Bibata-Modern-Classic";
       CursorSize = 24;
     };
-    # Belt-and-suspenders for the missing pointer: also inject the cursor into the
-    # greeter's environment. The Qt/QML theme reads [Theme] CursorTheme, but the
-    # Wayland greeter compositor picks the pointer up from XCURSOR_* — set both so a
-    # visible cursor shows at the login screen (no more Tab-only navigation).
     settings.General.GreeterEnvironment = "XCURSOR_THEME=Bibata-Modern-Classic,XCURSOR_SIZE=24";
   };
   # Default to the plain Hyprland session (start-hyprland — the launch path ReGreet

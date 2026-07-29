@@ -65,6 +65,10 @@
   xdg.configFile."kitty/kitty.conf".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/kitty/kitty.conf";
 
+  # yazi (Super+E) — Catppuccin Mocha pink theme on the rice near-black.
+  xdg.configFile."yazi/theme.toml".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/yazi/theme.toml";
+
   xdg.configFile."fuzzel/fuzzel.ini".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/fuzzel/fuzzel.ini";
 
