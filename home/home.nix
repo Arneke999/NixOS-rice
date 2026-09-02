@@ -46,6 +46,7 @@
     bibata-cursors
     inter
     firefox
+    nmap
   ];
 
   fonts.fontconfig.enable = true;
