@@ -313,6 +313,7 @@ in
     sddm-astronaut # SDDM greeter theme (also in sddm.extraPackages; here so it's on the system profile)
     bibata-cursors # cursor theme for the SDDM greeter (matches the home-session cursor)
     spotify
+    p7zip
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
