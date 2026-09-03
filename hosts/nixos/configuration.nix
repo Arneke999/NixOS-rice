@@ -131,7 +131,10 @@ in
 
   # Hyprland session (dynamic tiling). Built into nixpkgs — also pulls in the
   # Hyprland xdg-desktop-portal, so screenshare/file-picker work.
-  programs.hyprland.enable = true;
+  programs.hyprland = {
+    enable = true;
+    xwayland.enable = true;
+    }
 
   # VM workaround: this machine's virtio-gpu rejects atomic modesets for any mode
   # other than the current one ("atomic drm request: failed to commit: Invalid
@@ -247,6 +250,15 @@ in
   # eww bar (middle-click the BT icon) or bluetoothctl when you actually need it.
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = false;
+
+  # Intel GPU support
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+    extraPackages = with pkgs; [
+        intel-compute-runtime # For Intel 12th Gen and newer
+    ];
+  };
 
   # Audio
   security.rtkit.enable = true;

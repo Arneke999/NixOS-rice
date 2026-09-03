@@ -47,6 +47,7 @@
     inter
     firefox
     nmap
+    davinci-resolve
   ];
 
   fonts.fontconfig.enable = true;
