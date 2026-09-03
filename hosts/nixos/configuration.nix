@@ -134,7 +134,7 @@ in
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;
-    }
+    };
 
   # VM workaround: this machine's virtio-gpu rejects atomic modesets for any mode
   # other than the current one ("atomic drm request: failed to commit: Invalid
