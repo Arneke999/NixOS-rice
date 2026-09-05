@@ -13,6 +13,7 @@
 (defvar  bt_scan "[]")           ;; newly-discovered (unpaired) devices after a scan
 (defvar  bt_scanning false)      ;; true while a scan is running (button shows "scanning…")
 (defvar  wifi_nets "[]")         ;; nearby Wi-Fi networks for the picker (refreshed on popup open)
+(defvar  wifi_scanning false)    ;; true while a rescan runs (button shows a spinner)
 (deflisten workspaces :initial "[]" "~/nix-config/dotfiles/eww/scripts/workspaces.sh")
 ;; id of a workspace that just got a window while unfocused → flash its dot ("" = none)
 (deflisten ws_blink :initial "" "~/nix-config/dotfiles/eww/scripts/ws-blink.sh")
@@ -110,9 +111,11 @@
   (box :class "pill popup" :orientation "v" :space-evenly false :spacing 10
     (box :space-evenly false :spacing 8
       (label :class "popup-title" :hexpand true :halign "start" :text "Wi-Fi")
+      ;; Always clickable — the spinner is a visual cue only. Gating onclick on
+      ;; wifi_scanning meant a scan that never reset the flag left the button dead.
       (button :class "popup-manage" :tooltip "Rescan"
               :onclick "~/nix-config/dotfiles/eww/scripts/wifi-rescan.sh"
-        (label :text "󰑐"))
+        (label :text {wifi_scanning ? "󱥸" : "󰑐"}))
       (button :class {wifi.enabled ? "toggle on" : "toggle off"}
               :onclick "~/nix-config/dotfiles/eww/scripts/wifi-toggle.sh"
         (label :text {wifi.enabled ? "on" : "off"})))

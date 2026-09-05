@@ -2,7 +2,7 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, lib, pkgs, username, ... }:
+{ config, lib, pkgs, username, inputs, ... }:
 
 let
   # SDDM greeter theme: sddm-astronaut (Qt6/QML) themed to the rice — near-black
@@ -244,6 +244,9 @@ in
   
   #Allow unfree packages
   nixpkgs.config.allowUnfree = true;
+
+  #nix claude code overlay
+  nixpkgs.overlays = [ inputs.nix-claude-code.overlays.default ];
 
   # Bluetooth (provides bluetoothctl; eww bar has a toggle widget).
   # powerOnBoot = false → the adapter starts OFF each boot; toggle it on from the
