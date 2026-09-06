@@ -329,6 +329,7 @@ in
     bibata-cursors # cursor theme for the SDDM greeter (matches the home-session cursor)
     spotify
     p7zip
+    (python3.withPackages (python-pkgs: with python-pkgs; [  ]))
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
