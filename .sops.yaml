@@ -1,0 +1,12 @@
+# sops-nix policy: WHO may decrypt WHICH files.
+# `keys` lists recipients (age PUBLIC keys); creation_rules maps secret files to
+# the recipients allowed to decrypt them. Editing a file with `sops` re-encrypts
+# it to exactly these recipients. Add a machine/user by adding its public key
+# here and running `sops updatekeys secrets/*.yaml`.
+keys:
+  - &lain age10wekj2qm55y40d33yxl9qrd6pf8enmdpdap2pphpz4thqq3kfefs4fx6er
+creation_rules:
+  - path_regex: secrets/[^/]+\.yaml$
+    key_groups:
+      - age:
+          - *lain

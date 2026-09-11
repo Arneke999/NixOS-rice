@@ -108,6 +108,52 @@ in
   # Configure network connections interactively with nmcli or nmtui.
   networking.networkmanager.enable = true;
 
+  # ── Secrets (sops-nix) ───────────────────────────────────────────────────────
+  # Encrypted secrets live in secrets/secrets.yaml (committed, ciphertext only —
+  # safe for a public repo). This machine decrypts them at activation using the
+  # age key at /var/lib/sops-nix/key.txt (seeded once from your
+  # ~/.config/sops/age/keys.txt — see the rebuild steps). Decrypted values land at
+  # /run/secrets/<name> on tmpfs, root-readable only.
+  sops.defaultSopsFile = ../../secrets/secrets.yaml;
+  sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+  sops.secrets.campusroam_password = { };
+  sops.secrets.campusroam_identity = { };
+
+  # Render the Wi-Fi password into a KEY=value env file that NetworkManager's
+  # ensureProfiles substitutes into the profile below (as $CAMPUSROAM_PW). The
+  # ${...} placeholder is replaced at activation from the decrypted secret, so the
+  # real password is never in the Nix store or the repo.
+  sops.templates."nm-campusroam.env".content = ''
+    CAMPUSROAM_ID=${config.sops.placeholder.campusroam_identity}
+    CAMPUSROAM_PW=${config.sops.placeholder.campusroam_password}
+  '';
+
+  networking.networkmanager.ensureProfiles = {
+    environmentFiles = [ config.sops.templates."nm-campusroam.env".path ];
+    profiles.campusroam = {
+      connection = {
+        id = "campusroam";
+        type = "wifi";
+        interface-name = "wlp0s20f3";
+      };
+      wifi = {
+        mode = "infrastructure";
+        ssid = "campusroam";
+      };
+      wifi-security.key-mgmt = "wpa-eap";
+      "802-1x" = {
+        eap = "peap";
+        phase2-auth = "mschapv2";
+        identity = "$CAMPUSROAM_ID";     # substituted from the sops env file above
+        password = "$CAMPUSROAM_PW";     # substituted from the sops env file above
+        system-ca-certs = true;          # "Use system certificates"
+        domain-suffix-match = "radius.kuleuven.be";
+      };
+      ipv4.method = "auto";
+      ipv6.method = "auto";
+    };
+  };
+
   # Set your time zone.
   time.timeZone = "Europe/Brussels";
 

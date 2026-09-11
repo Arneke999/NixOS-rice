@@ -3,13 +3,14 @@
 	inputs = {
 		nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nix-claude-code.url = "github:ryoppippi/nix-claude-code";
+    sops-nix.url = "github:Mic92/sops-nix";
 		home-manager = {
 			url = "github:nix-community/home-manager/master";
 			inputs.nixpkgs.follows = "nixpkgs";
 			};
 		};
 
-	outputs = { self, nixpkgs, home-manager, ... }@inputs:
+	outputs = { self, nixpkgs, home-manager, sops-nix, ... }@inputs:
 	let
 		# ── Single source of truth ─────────────────────────────────────────
 		# Change this one line (or set it via install.sh) to rename the user.
@@ -22,6 +23,7 @@
 			modules = [
 				./hosts/nixos/configuration.nix
 				home-manager.nixosModules.home-manager
+        sops-nix.nixosModules.sops
 				{
 					home-manager.useGlobalPkgs = true;
 					home-manager.useUserPackages = true;

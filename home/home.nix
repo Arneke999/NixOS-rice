@@ -48,6 +48,12 @@
     firefox
     nmap
     davinci-resolve
+    sqlite
+    openvpn
+    discord
+    steam
+    sops
+    age
   ];
 
   fonts.fontconfig.enable = true;
