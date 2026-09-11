@@ -23,6 +23,14 @@
 (deflisten workspaces :initial "[]" "~/nix-config/dotfiles/eww/scripts/workspaces.sh")
 ;; id of a workspace that just got a window while unfocused → flash its dot ("" = none)
 (deflisten ws_blink :initial "" "~/nix-config/dotfiles/eww/scripts/ws-blink.sh")
+;; Now-playing (MPRIS): a deflisten pushes metadata/status on every change; position
+;; is polled separately (1s) only for the seek bar so metadata isn't re-read each tick.
+(deflisten mpris :initial '{"present":false,"status":"","title":"","artist":"","album":"","art":"","len":0,"lenstr":"0:00"}' "~/nix-config/dotfiles/eww/scripts/mpris.sh")
+(defpoll   mpris_pos :interval "1s" :initial '{"sec":0,"str":"0:00"}' "~/nix-config/dotfiles/eww/scripts/mpris-pos.sh")
+;; Quick toggles (bar buttons): caffeine (keep-awake), do-not-disturb, night light.
+(defpoll caffeine   :interval "3s" :initial "false" "~/nix-config/dotfiles/eww/scripts/caffeine.sh")
+(defpoll dnd        :interval "3s" :initial "false" "~/nix-config/dotfiles/eww/scripts/dnd.sh")
+(defpoll nightlight :interval "3s" :initial "false" "~/nix-config/dotfiles/eww/scripts/nightlight.sh")
 
 ;; ── widgets ──────────────────────────────────────────────────────
 (defwidget workspaces []
@@ -40,6 +48,19 @@
   (eventbox :class "clock-box" :onclick "swaync-client -t -sw" :tooltip "Notifications"
     (box :class "pill clock"
       (label :text time))))
+
+;; Now-playing module (left of the bar). Only shown when a player exists; the note
+;; glyph pulses while playing. Click opens the media popup.
+(defwidget music []
+  ;; Only shown when something is actually loaded (title non-empty) — otherwise a
+  ;; stopped/idle player left a lone note with an empty gap (the "off-centre" look).
+  (eventbox :class "music-box" :visible {mpris.present && mpris.title != ""}
+            :onclick "~/nix-config/dotfiles/eww/scripts/pop.sh pop-music"
+            :tooltip {mpris.album}
+    (box :class "pill music" :space-evenly false :spacing 8 :valign "center"
+      (label :class {mpris.status == "Playing" ? "music-ic playing" : "music-ic"} :valign "center" :text "󰝚")
+      (label :class "music-title" :halign "start" :valign "center" :limit-width 24
+             :text {mpris.artist != "" ? "${mpris.artist} — ${mpris.title}" : mpris.title}))))
 
 (defwidget ring [value cls icon name]
   (eventbox :tooltip "${name}  ${round(value, 0)}%"
@@ -92,6 +113,18 @@
                      battery.plugged  ? "bat plugged" :
                      battery.capacity <= 15 ? "bat low" : "bat"}
              :text "${battery.icon} ${battery.capacity}%"))
+
+    ;; Quick toggles — caffeine (keep-awake), do-not-disturb, night light. Icon-only;
+    ;; lit pink when active, muted when off.
+    (button :class {caffeine ? "qs on" : "qs"} :tooltip {caffeine ? "Caffeine: on (screen stays awake)" : "Caffeine: off"}
+            :onclick "~/nix-config/dotfiles/eww/scripts/caffeine.sh toggle"
+      (label :text {caffeine ? "󰅶" : "󰛊"}))
+    (button :class {dnd ? "qs on" : "qs"} :tooltip {dnd ? "Do Not Disturb: on" : "Do Not Disturb: off"}
+            :onclick "~/nix-config/dotfiles/eww/scripts/dnd.sh toggle"
+      (label :text {dnd ? "󰂛" : "󰂚"}))
+    (button :class {nightlight ? "qs on" : "qs"} :tooltip {nightlight ? "Night light: on (4000K)" : "Night light: off"}
+            :onclick "~/nix-config/dotfiles/eww/scripts/nightlight.sh toggle"
+      (label :text {nightlight ? "󰽥" : "󰃞"}))
 
     ;; Weather — animated condition glyph + temp; click opens the forecast popup.
     ;; Hidden until the first successful fetch so no placeholder flashes at login.
@@ -210,6 +243,28 @@
           (label :class "wthr-hilo" :text "${d.hi}°")
           (label :class "wthr-lo"   :text "${d.lo}°"))))))
 
+(defwidget pop-music-w []
+  (box :class "pill popup music-pop" :orientation "v" :space-evenly false :spacing 12
+    ;; album art + track/artist/album
+    (box :space-evenly false :spacing 14 :valign "center"
+      (box :class "music-art" :valign "center" :visible {mpris.art != ""}
+        (image :path {mpris.art} :image-width 92 :image-height 92))
+      (box :orientation "v" :space-evenly false :spacing 3 :valign "center" :hexpand true
+        (label :class "music-t"    :halign "start" :limit-width 24 :text {mpris.title})
+        (label :class "popup-sub"  :halign "start" :limit-width 24 :text {mpris.artist})
+        (label :class "popup-sub"  :halign "start" :limit-width 24 :text {mpris.album})))
+    ;; seek bar: elapsed / total
+    (box :space-evenly false :spacing 8
+      (label :class "music-time" :text {mpris_pos.str})
+      (scale :class "music-seek" :hexpand true :active false
+             :value {mpris.len > 0 ? (mpris_pos.sec / mpris.len * 100) : 0} :min 0 :max 100)
+      (label :class "music-time" :text {mpris.lenstr}))
+    ;; transport controls
+    (box :halign "center" :space-evenly false :spacing 20
+      (button :class "music-btn"     :onclick "~/nix-config/dotfiles/eww/scripts/mpris-ctl.sh prev"   (label :text "󰒮"))
+      (button :class "music-btn big" :onclick "~/nix-config/dotfiles/eww/scripts/mpris-ctl.sh toggle" (label :text {mpris.status == "Playing" ? "󰏤" : "󰐊"}))
+      (button :class "music-btn"     :onclick "~/nix-config/dotfiles/eww/scripts/mpris-ctl.sh next"   (label :text "󰒭")))))
+
 ;; ── bar ──────────────────────────────────────────────────────────
 (defwindow bar
   :monitor 0
@@ -217,7 +272,9 @@
   :exclusive true
   :stacking "fg"
   (centerbox :class "bar"
-    (box :halign "start"  (workspaces))
+    (box :halign "start" :space-evenly false :spacing 0
+      (workspaces)
+      (music))
     (box :halign "center" (clock))
     (box :halign "end"    (metrics))))
 
@@ -260,3 +317,8 @@
   :monitor 0 :stacking "overlay"
   :geometry (geometry :y "6px" :x "8px" :anchor "top right" :width "300px")
   (pop-weather-w))
+
+(defwindow pop-music
+  :monitor 0 :stacking "overlay"
+  :geometry (geometry :y "6px" :x "8px" :anchor "top left" :width "320px")
+  (pop-music-w))

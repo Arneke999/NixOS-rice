@@ -15,6 +15,11 @@
   border-radius: 16px;
   padding: 0 12px;
   margin: 0 4px;
+  // Uniform height: the metrics pill is stretched tall by the CPU/RAM rings, so give
+  // every bar pill the same min-height (content vertically centered) — otherwise the
+  // shorter workspaces/clock/music pills don't line up with it. (Popups also use
+  // .pill but are far taller, so this floor is a no-op there.)
+  min-height: 34px;
 }
 
 .ws-dot {
@@ -104,6 +109,30 @@ menu separator {
 .wthr-fc-ic { font-size: 22px; }
 .wthr-hilo { color: #cdd6f4; font-size: 12px; }
 .wthr-lo   { color: #8a8a90; font-size: 12px; }
+
+// ── now-playing (mpris) ───────────────────────────────────────────
+// Bar module: note glyph (pulses pink while playing) + truncated artist — title.
+.music-ic { color: #cba6f7; font-size: 15px; }
+.music-ic.playing { animation: music-pulse 2s ease-in-out infinite; }
+@keyframes music-pulse { 0% { color: #cba6f7; } 50% { color: #f5c2e7; } 100% { color: #cba6f7; } }
+.music-title { color: #c8c8ce; }
+
+// popup: album art + track info, seek bar (reuses the .scale styling), transport.
+.music-pop  { min-width: 300px; }
+.music-t    { color: #f5c2e7; font-size: 15px; }
+.music-time { color: #8a8a90; font-size: 11px; }
+.music-btn  { color: #c8c8ce; font-size: 18px; padding: 4px 8px; border-radius: 8px; }
+.music-btn:hover { background-color: #1a1a1f; color: #f5c2e7; }
+.music-btn.big   { font-size: 24px; color: #f5c2e7; }
+
+// ── quick toggles (caffeine / dnd / night light) ──────────────────
+// Icon-only bar buttons in the metrics pill; muted when off, pink when active.
+.qs {
+  color: #8a8a90;
+  padding: 0 5px;
+}
+.qs:hover { color: #cba6f7; }   // colour-only hover — no backdrop box
+.qs.on    { color: #f5c2e7; }
 
 .ring {
   // Diameter = min(width, height), and height is capped by the bar (:height 46px in

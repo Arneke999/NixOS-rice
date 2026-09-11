@@ -4,7 +4,7 @@
 #                     behind it; clicking anywhere off the popup hits the backdrop
 #                     and closes everything)
 #   pop.sh close      close every popup + the backdrop
-pops="pop-brightness pop-audio pop-wifi pop-bt pop-weather calendar"
+pops="pop-brightness pop-audio pop-wifi pop-bt pop-weather pop-music calendar"
 
 close_all() { eww close $pops pop-backdrop >/dev/null 2>&1 || true; }
 

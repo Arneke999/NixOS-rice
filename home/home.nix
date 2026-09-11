@@ -16,6 +16,9 @@
     eww
     jq
     socat                    # eww workspace widget: Hyprland socket2 event stream
+    playerctl                # eww now-playing widget: MPRIS metadata + transport controls
+    # (night light uses Hyprland's decoration:screen_shader — dotfiles/hypr/nightlight.frag —
+    #  not gammastep, since this VM's virtio-gpu has no gamma-control support.)
     grim                     # screenshots (Print binds)
     slurp                    # region select for screenshots
     wl-clipboard             # wl-copy — screenshots to clipboard
@@ -47,7 +50,6 @@
     inter
     firefox
     nmap
-    davinci-resolve
     sqlite
     openvpn
     discord
