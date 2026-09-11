@@ -54,6 +54,7 @@
     steam
     sops
     age
+    httpx
   ];
 
   fonts.fontconfig.enable = true;

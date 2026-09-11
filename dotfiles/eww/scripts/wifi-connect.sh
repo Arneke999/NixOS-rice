@@ -7,11 +7,28 @@
 #   secured, none  → close the popup, prompt for the password in a themed fuzzel
 #                    (--password), then connect. On failure the half-created profile
 #                    is deleted so the next attempt re-prompts cleanly.
-# The real nmcli error is surfaced in the toast (no more blind "wrong password").
-# Success toasts are left to conn-notify.sh so every connect notifies exactly once.
+#
+# ── WHY THIS DETACHES (the bug that survived 4 "fixes") ──────────────────────
+# eww runs this as the onclick CHILD of the network button. The password flow
+# closes the popup (pop.sh close) and later rebuilds the network list (refresh) —
+# BOTH destroy the widget/window that owns this child, and eww then kills the
+# onclick child's process group. So the script died the instant it closed the
+# popup: fuzzel was orphaned and the nmcli connect after it never ran. Every past
+# fix edited code that only runs AFTER that death, so nothing changed.
+# Fix: re-exec ourselves DETACHED (setsid, new session/process group) so eww's
+# child-kill can't reach us. Same pattern already used by wifi-rescan/wifi-toggle.
 set -uo pipefail
+
 ssid="${1:-}"; secure="${2:-false}"
 [ -z "$ssid" ] && exit 0
+
+# Re-exec detached on first entry. `setsid` puts us in a fresh session so we
+# survive the popup closing and the list rebuilding; the onclick returns at once.
+if [ "${WIFI_CONNECT_DETACHED:-}" != 1 ]; then
+  setsid -f env WIFI_CONNECT_DETACHED=1 "$0" "$ssid" "$secure" >/dev/null 2>&1 || true
+  exit 0
+fi
+
 d="$(dirname "$0")"
 CFG="$HOME/nix-config/dotfiles/fuzzel/picker.ini"
 

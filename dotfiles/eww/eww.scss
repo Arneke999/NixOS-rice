@@ -36,6 +36,41 @@
 
 .metrics label { padding: 0 6px; }
 
+// System tray (StatusNotifierItem icons) — lives INSIDE the metrics pill (left of
+// CPU/RAM), so it's part of that pill, not a separate floating box. Hidden when
+// empty via tray_count. App icons are the apps' own bitmaps, so their colour can't
+// be restyled in GTK CSS; per-icon hover matches the .bt-dev rows.
+.tray > * {
+  padding: 2px 5px;
+  border-radius: 8px;
+}
+.tray > *:hover { background-color: #1a1a1f; }
+
+// Tray right-click menu — this is a real GTK menu popped by the SNI item, not an eww
+// widget, so it's styled with GTK menu selectors (nothing else in eww uses `menu`).
+// Rice it to match the popups: near-black surface, pink hover, rounded rows.
+menu {
+  background-color: #0f0f11;
+  border: 1px solid #1e1e22;
+  border-radius: 10px;
+  padding: 4px;
+}
+menu menuitem {
+  border-radius: 6px;
+  padding: 5px 12px;
+}
+menu menuitem label { color: #c8c8ce; }
+menu menuitem:hover,
+menu menuitem:focus            { background-color: #f5c2e7; }
+menu menuitem:hover label,
+menu menuitem:focus label      { color: #0f0f11; }
+menu menuitem:disabled label   { color: #55555b; }
+menu separator {
+  background-color: #1e1e22;
+  min-height: 1px;
+  margin: 4px 2px;
+}
+
 .ring {
   // Diameter = min(width, height), and height is capped by the bar (:height 46px in
   // eww.yuck) minus `.bar` padding — so raising these past ~34px does nothing to the

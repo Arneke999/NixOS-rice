@@ -7,6 +7,9 @@
 (defpoll brightness :interval "3s"  :initial '{"present":false,"value":0}'                           "~/nix-config/dotfiles/eww/scripts/brightness.sh")
 (defpoll bluetooth  :interval "5s"  :initial '{"present":false,"powered":false,"connected":false}'   "~/nix-config/dotfiles/eww/scripts/bluetooth.sh")
 (defpoll wifi       :interval "10s" :initial '{"enabled":false,"ssid":"","signal":0}'                "~/nix-config/dotfiles/eww/scripts/wifi.sh")
+;; Number of tray icons (StatusNotifierItems) — used only to hide the tray pill when
+;; the tray is empty, so no empty near-black blob shows left of CPU/RAM.
+(defpoll tray_count :interval "2s"  :initial "0"                                                     "~/nix-config/dotfiles/eww/scripts/tray-count.sh")
 ;; Bluetooth device list is refreshed on demand (popup open / toggle / connect),
 ;; not polled, to avoid constant bluetoothctl spawns.
 (defvar  bt_devices "[]")
@@ -42,6 +45,11 @@
 
 (defwidget metrics []
   (box :class "pill metrics" :space-evenly false :spacing 8
+    ;; System tray at the LEFT end of the metrics pill (left of CPU/RAM) so the icons
+    ;; live INSIDE the same pill as everything else — part of the bar, not a floating
+    ;; box. Hidden when empty (tray_count) so it adds no left-gap when nothing's trayed.
+    (systray :class "tray" :orientation "h" :space-evenly false :icon-size 16 :spacing 6
+             :prepend-new false :visible {tray_count > 0})
     (ring :value {EWW_CPU.avg}            :cls "cpu" :icon "" :name "CPU")
     (ring :value {EWW_RAM.used_mem_perc}  :cls "ram" :icon "" :name "RAM")
 
