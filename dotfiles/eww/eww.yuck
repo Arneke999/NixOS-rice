@@ -10,6 +10,9 @@
 ;; Number of tray icons (StatusNotifierItems) — used only to hide the tray pill when
 ;; the tray is empty, so no empty near-black blob shows left of CPU/RAM.
 (defpoll tray_count :interval "2s"  :initial "0"                                                     "~/nix-config/dotfiles/eww/scripts/tray-count.sh")
+;; Weather (wttr.in, IP-located) — current + 3-day forecast in one object; the popup
+;; reads the same var so there's a single fetch every 15 min.
+(defpoll weather    :interval "15m" :initial '{"ok":false,"icon":"󰖐","temp":0,"desc":"…","city":"","class":"cloudy","feels":0,"humidity":0,"wind":0,"forecast":[]}' "~/nix-config/dotfiles/eww/scripts/weather.sh")
 ;; Bluetooth device list is refreshed on demand (popup open / toggle / connect),
 ;; not polled, to avoid constant bluetoothctl spawns.
 (defvar  bt_devices "[]")
@@ -89,6 +92,13 @@
                      battery.plugged  ? "bat plugged" :
                      battery.capacity <= 15 ? "bat low" : "bat"}
              :text "${battery.icon} ${battery.capacity}%"))
+
+    ;; Weather — animated condition glyph + temp; click opens the forecast popup.
+    ;; Hidden until the first successful fetch so no placeholder flashes at login.
+    (eventbox :class "wthr-box" :visible {weather.ok}
+              :onclick "~/nix-config/dotfiles/eww/scripts/pop.sh pop-weather"
+      (label :class "weather ${weather.class}" :text "${weather.icon} ${weather.temp}°"
+             :tooltip "${weather.city} · ${weather.desc}"))
 
     (eventbox :class "date-box" :onclick "~/nix-config/dotfiles/eww/scripts/pop.sh calendar"
       (label :class "date" :text date_str))))
@@ -178,6 +188,28 @@
             :onclick "~/nix-config/dotfiles/eww/scripts/bt-scan-run.sh"
       (label :text {bt_scanning ? "scanning…" : "Scan for devices"}))))
 
+(defwidget pop-weather-w []
+  (box :class "pill popup wthr-pop" :orientation "v" :space-evenly false :spacing 12
+    ;; header: city + current description
+    (box :space-evenly false :spacing 8
+      (label :class "popup-title" :hexpand true :halign "start" :text {weather.city})
+      (label :class "popup-sub" :halign "end" :text {weather.desc}))
+    ;; current: big animated glyph + temperature, with feels/humidity/wind
+    (box :space-evenly false :spacing 14 :halign "start"
+      (label :class "weather ${weather.class} wthr-big" :text {weather.icon})
+      (box :orientation "v" :space-evenly false :spacing 2 :valign "center"
+        (label :class "wthr-temp" :halign "start" :text "${weather.temp}°C")
+        (label :class "popup-sub" :halign "start"
+               :text "feels ${weather.feels}°   󰖎 ${weather.humidity}%   󰖝 ${weather.wind} km/h")))
+    ;; 3-day forecast row
+    (box :class "wthr-fc" :space-evenly true :spacing 6
+      (for d in {weather.forecast}
+        (box :class "wthr-day" :orientation "v" :space-evenly false :spacing 3
+          (label :class "popup-sub" :text {d.day})
+          (label :class "weather ${d.class} wthr-fc-ic" :text {d.icon})
+          (label :class "wthr-hilo" :text "${d.hi}°")
+          (label :class "wthr-lo"   :text "${d.lo}°"))))))
+
 ;; ── bar ──────────────────────────────────────────────────────────
 (defwindow bar
   :monitor 0
@@ -223,3 +255,8 @@
   :monitor 0 :stacking "overlay"
   :geometry (geometry :y "6px" :x "8px" :anchor "top right" :width "260px")
   (pop-bt-w))
+
+(defwindow pop-weather
+  :monitor 0 :stacking "overlay"
+  :geometry (geometry :y "6px" :x "8px" :anchor "top right" :width "300px")
+  (pop-weather-w))

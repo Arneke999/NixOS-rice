@@ -71,6 +71,40 @@ menu separator {
   margin: 4px 2px;
 }
 
+// ── weather ──────────────────────────────────────────────────────
+// GTK3 can't do QML/particle-style motion, so the "animation" is a gentle colour
+// pulse (same reliable technique as .ws-dot.blink) — the glyph breathes between two
+// on-palette Catppuccin tones per condition. Rain/thunder pulse faster + flashier,
+// clear/cloud shimmer slowly. Colours double as an at-a-glance condition cue.
+.weather { color: #cba6f7; }
+.weather.clear   { animation: wthr-sun     4s   ease-in-out infinite; }
+.weather.partly  { animation: wthr-sun     4.5s ease-in-out infinite; }
+.weather.cloudy  { animation: wthr-cloud   5s   ease-in-out infinite; }
+.weather.fog     { animation: wthr-cloud   5s   ease-in-out infinite; }
+.weather.rain    { animation: wthr-rain    2.2s ease-in-out infinite; }
+.weather.sleet   { animation: wthr-rain    2.4s ease-in-out infinite; }
+.weather.snow    { animation: wthr-snow    3s   ease-in-out infinite; }
+.weather.thunder { animation: wthr-thunder 1.8s ease-in-out infinite; }
+
+// NOTE: grass (eww's SCSS compiler) rejects comma-combined keyframe stops like
+// `0%,100%` — each percentage must be its own block, same as .ws-dot.blink above.
+@keyframes wthr-sun     { 0% { color: #f9e2af; } 50% { color: #fab387; } 100% { color: #f9e2af; } }
+@keyframes wthr-cloud   { 0% { color: #a6adc8; } 50% { color: #7f849c; } 100% { color: #a6adc8; } }
+@keyframes wthr-rain    { 0% { color: #89b4fa; } 50% { color: #74c7ec; } 100% { color: #89b4fa; } }
+@keyframes wthr-snow    { 0% { color: #cdd6f4; } 50% { color: #9399b2; } 100% { color: #cdd6f4; } }
+@keyframes wthr-thunder { 0% { color: #cba6f7; } 50% { color: #f5c2e7; } 100% { color: #cba6f7; } }
+
+// weather popup (forecast)
+.wthr-pop  { min-width: 260px; }
+.wthr-big  { font-size: 46px; }
+.wthr-temp { color: #cdd6f4; font-size: 26px; }
+.wthr-fc   { border-top: 1px solid #1e1e22; padding-top: 10px; }
+.wthr-day  { padding: 4px 8px; border-radius: 10px; }
+.wthr-day:hover { background-color: #17171a; }
+.wthr-fc-ic { font-size: 22px; }
+.wthr-hilo { color: #cdd6f4; font-size: 12px; }
+.wthr-lo   { color: #8a8a90; font-size: 12px; }
+
 .ring {
   // Diameter = min(width, height), and height is capped by the bar (:height 46px in
   // eww.yuck) minus `.bar` padding — so raising these past ~34px does nothing to the
