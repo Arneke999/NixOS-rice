@@ -377,7 +377,15 @@ in
     p7zip
     (python3.withPackages (python-pkgs: with python-pkgs; [  ]))
   ];
-
+  
+  services.flatpak.enable = true;
+  systemd.services.flatpak-repo = {
+  wantedBy = [ "multi-user.target" ];
+  path = [ pkgs.flatpak ];
+  script = ''
+    flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+  '';
+};
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;

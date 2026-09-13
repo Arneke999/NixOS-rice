@@ -31,6 +31,8 @@
     neovim                   # Neovim tooling (installed via Nix, NOT mason — mason binaries break on NixOS):
     lua-language-server   # lua_ls
     nixd                  # Nix LSP
+    basedpyright          # Python LSP (pyright fork) — type/import/syntax diagnostics
+    ruff                  # Python linter LSP (fast) — unused imports, undefined names, style
     ripgrep               # telescope live-grep
     fd                    # telescope find-files
     gcc                   # compile treesitter parsers + fzf-native

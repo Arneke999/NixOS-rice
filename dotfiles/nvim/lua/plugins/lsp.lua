@@ -27,6 +27,13 @@ return {
         map("<leader>rn", vim.lsp.buf.rename, "Rename")
         map("<leader>ca", vim.lsp.buf.code_action, "Code action")
         map("gD", vim.lsp.buf.declaration, "Goto declaration")
+
+        -- With both ruff (lint) and basedpyright (types) on a Python buffer, let
+        -- basedpyright own hover — ruff's hover adds nothing.
+        local client = vim.lsp.get_client_by_id(event.data.client_id)
+        if client and client.name == "ruff" then
+          client.server_capabilities.hoverProvider = false
+        end
       end,
     })
 
@@ -45,6 +52,24 @@ return {
       },
     })
 
-    vim.lsp.enable({ "lua_ls", "nixd" })
+    -- Python: basedpyright (pyright fork). Gives the diagnostics you'd expect —
+    -- unresolved imports, undefined names, syntax errors, type errors. "standard"
+    -- mode keeps it useful without flagging every un-annotated value; open files
+    -- only, so it doesn't scan the whole tree. (Install: basedpyright via Nix.)
+    vim.lsp.config("basedpyright", {
+      settings = {
+        basedpyright = {
+          analysis = {
+            typeCheckingMode = "standard",
+            diagnosticMode = "openFilesOnly",
+            inlayHints = { variableTypes = false, functionReturnTypes = false },
+          },
+        },
+      },
+    })
+
+    -- Python linting: ruff (fast) — unused imports, undefined names, style (F/E codes).
+    -- Complements basedpyright's type checking; both attach to the same buffer.
+    vim.lsp.enable({ "lua_ls", "nixd", "basedpyright", "ruff" })
   end,
 }

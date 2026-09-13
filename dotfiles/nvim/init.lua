@@ -31,3 +31,7 @@ require("lazy").setup({
 
 -- Apply the Catppuccin theme LAST so it overrides plugin defaults.
 require("theme").apply()
+
+-- Error Lens-style inline diagnostics. AFTER theme.apply() so its custom highlight
+-- groups aren't wiped by the theme's `highlight clear`.
+require("diagnostics").setup()
