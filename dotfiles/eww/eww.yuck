@@ -20,6 +20,7 @@
 (defvar  bt_scanning false)      ;; true while a scan is running (button shows "scanning…")
 (defvar  wifi_nets "[]")         ;; nearby Wi-Fi networks for the picker (refreshed on popup open)
 (defvar  wifi_scanning false)    ;; true while a rescan runs (button shows a spinner)
+(defvar  audio_sinks "[]")       ;; audio output devices for the volume popup (refreshed on open)
 (deflisten workspaces :initial "[]" "~/nix-config/dotfiles/eww/scripts/workspaces.sh")
 ;; id of a workspace that just got a window while unfocused → flash its dot ("" = none)
 (deflisten ws_blink :initial "" "~/nix-config/dotfiles/eww/scripts/ws-blink.sh")
@@ -85,7 +86,7 @@
 
     ;; Volume — click opens the popup, middle-click mutes, scroll changes it.
     (eventbox :class "vol-box"
-              :onclick "~/nix-config/dotfiles/eww/scripts/pop.sh pop-audio"
+              :onclick "~/nix-config/dotfiles/eww/scripts/audio-open.sh"
               :onmiddleclick "~/nix-config/dotfiles/eww/scripts/vol-ctl.sh mute"
               :onscroll "~/nix-config/dotfiles/eww/scripts/vol-ctl.sh {}"
       (label :class "vol"
@@ -156,7 +157,17 @@
       (scale :class "popup-scale" :hexpand true :orientation "h" :flipped false
              :value {volume.muted ? 0 : volume.value} :min 0 :max 101
              :onchange "~/nix-config/dotfiles/eww/scripts/vol-ctl.sh set {}")
-      (label :class "popup-val" :text {volume.muted ? "muted" : "${volume.value}%"}))))
+      (label :class "popup-val" :text {volume.muted ? "muted" : "${volume.value}%"}))
+    ;; Output device picker — only shown when there's more than one sink. Click a row
+    ;; to make it the default output. Reuses the .bt-dev row styling (active = pink).
+    (box :orientation "v" :space-evenly false :spacing 3 :visible {arraylength(audio_sinks) > 1}
+      (label :class "popup-sub" :halign "start" :text "Output")
+      (for s in audio_sinks
+        (button :class {s.active ? "bt-dev connected" : "bt-dev"}
+                :onclick "~/nix-config/dotfiles/eww/scripts/audio-set.sh ${s.id}"
+          (box :space-evenly false :spacing 8
+            (label :text {s.active ? "󰄬" : "󰕾"})
+            (label :hexpand true :halign "start" :limit-width 28 :text {s.name})))))))
 
 (defwidget pop-wifi-w []
   (box :class "pill popup" :orientation "v" :space-evenly false :spacing 10
@@ -300,7 +311,7 @@
 
 (defwindow pop-audio
   :monitor 0 :stacking "overlay"
-  :geometry (geometry :y "6px" :x "8px" :anchor "top right" :width "260px")
+  :geometry (geometry :y "6px" :x "8px" :anchor "top right" :width "300px")
   (pop-audio-w))
 
 (defwindow pop-wifi

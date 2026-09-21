@@ -59,9 +59,28 @@
     sops
     age
     httpx
+    protonplus
   ];
 
   fonts.fontconfig.enable = true;
+
+  # Session target for the plain (non-UWSM) start-hyprland launch. Hyprland >=0.46
+  # no longer ships hyprland-session.target, and nothing else activates
+  # graphical-session.target — but xdg-desktop-portal has
+  # `Requisite=graphical-session.target`, so without this the portal never starts
+  # ("NameHasNoOwner: Could not activate remote peer org.freedesktop.portal.Desktop")
+  # and anything portal-backed breaks: Flatpak webviews (Sober's Roblox captcha
+  # hangs on its proxy lookup), file pickers, screenshare. hyprland.conf starts
+  # this target on launch, right after dbus-update-activation-environment.
+  systemd.user.targets.hyprland-session = {
+    Unit = {
+      Description = "Hyprland compositor session";
+      Documentation = [ "man:systemd.special(7)" ];
+      BindsTo = [ "graphical-session.target" ];
+      Wants = [ "graphical-session-pre.target" ];
+      After = [ "graphical-session-pre.target" ];
+    };
+  };
 
   home.sessionVariables = {
     XCURSOR_THEME = "Bibata-Modern-Classic";

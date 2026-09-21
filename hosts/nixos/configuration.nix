@@ -146,8 +146,15 @@ in
         phase2-auth = "mschapv2";
         identity = "$CAMPUSROAM_ID";     # substituted from the sops env file above
         password = "$CAMPUSROAM_PW";     # substituted from the sops env file above
-        system-ca-certs = true;          # "Use system certificates"
-        domain-suffix-match = "radius.kuleuven.be";
+        # CA validation: point at the bundle FILE, not `system-ca-certs`. On NixOS
+        # `system-ca-certs = true` makes wpa_supplicant use ca_path=/etc/ssl/certs — a
+        # DIRECTORY that isn't OpenSSL-hashed here, so it finds no CA and rejects the
+        # RADIUS server (deauth Reason 23 = IEEE8021X_FAILED, before the password is
+        # even checked). The bundle file validates KU Leuven's public-CA cert fine.
+        ca-cert = "/etc/ssl/certs/ca-certificates.crt";
+        # Suffix match against the server cert name. It's *.kuleuven.be (NOT literally
+        # radius.kuleuven.be, which the old value assumed and which also failed).
+        domain-suffix-match = "kuleuven.be";
       };
       ipv4.method = "auto";
       ipv6.method = "auto";
