@@ -128,18 +128,12 @@ in
     CAMPUSROAM_PW=${config.sops.placeholder.campusroam_password}
   '';
 
-  networking.networkmanager.ensureProfiles = {
-    environmentFiles = [ config.sops.templates."nm-campusroam.env".path ];
-    profiles.campusroam = {
-      connection = {
-        id = "campusroam";
-        type = "wifi";
-        interface-name = "wlp0s20f3";
-      };
-      wifi = {
-        mode = "infrastructure";
-        ssid = "campusroam";
-      };
+  # campusroam (5 GHz) and campusroam-2.4 (2.4 GHz) are separate SSIDs but use the
+  # SAME KU Leuven credentials + settings, so both are built from one helper below.
+  networking.networkmanager.ensureProfiles = let
+    mkCampusroam = ssid: {
+      connection = { id = ssid; type = "wifi"; interface-name = "wlp0s20f3"; };
+      wifi = { mode = "infrastructure"; inherit ssid; };
       wifi-security.key-mgmt = "wpa-eap";
       "802-1x" = {
         eap = "peap";
@@ -158,6 +152,12 @@ in
       };
       ipv4.method = "auto";
       ipv6.method = "auto";
+    };
+  in {
+    environmentFiles = [ config.sops.templates."nm-campusroam.env".path ];
+    profiles = {
+      campusroam         = mkCampusroam "campusroam";
+      "campusroam-2.4"   = mkCampusroam "campusroam-2.4";
     };
   };
 
@@ -254,10 +254,18 @@ in
       PLATFORM_PROFILE_ON_BAT = "low-power";
       PCIE_ASPM_ON_BAT  = "powersupersave";
       RUNTIME_PM_ON_BAT = "auto";
+      RUNTIME_PM_ON_AC  = "auto";           # also power-manage PCI devices on AC (no downside on a laptop)
       USB_AUTOSUSPEND = 1;
-      # Optional Li-ion longevity (uncomment if the EC supports charge limits):
-      # START_CHARGE_THRESH_BAT0 = 75;
-      # STOP_CHARGE_THRESH_BAT0  = 80;
+      WIFI_PWR_ON_BAT = "on";               # Wi-Fi power saving on battery (small win; revert if you see lag)
+      SOUND_POWER_SAVE_ON_BAT = 1;          # HDA codec powersave on battery (already active; make it explicit)
+      # Li-ion longevity: cap charging at 80% (resume below 75%) so the cells don't sit
+      # pegged at 100% while plugged in at the desk — the main cause of calendar aging.
+      # BEFORE CLASS, top up to full for the day with:  sudo tlp fullcharge BAT0
+      # (one-shot override; the 80% cap resumes on the next unplug/replug).
+      # Needs EC support — verify after rebuild with `sudo tlp-stat -b` (look for the
+      # charge thresholds); if it says unsupported, remove these two lines.
+      START_CHARGE_THRESH_BAT0 = 75;
+      STOP_CHARGE_THRESH_BAT0  = 80;
     };
   };
 
@@ -306,6 +314,19 @@ in
   # eww bar (middle-click the BT icon) or bluetoothctl when you actually need it.
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = false;
+  # Make reconnection to known devices more reliable ("just works" auto-connect):
+  hardware.bluetooth.settings = {
+    General = {
+      FastConnectable = true;            # link back up quickly when a known device reappears
+      JustWorksRepairing = "always";     # headsets (incl. AirPods) re-pair without prompts
+      Experimental = true;               # exposes battery % for BLE devices (e.g. AirPods)
+    };
+    Policy = {
+      # Retry auto-reconnect a few times when a trusted device drops/reappears.
+      ReconnectAttempts = 7;
+      ReconnectIntervals = "1,2,4,8,16,32,64";
+    };
+  };
 
   # Intel GPU support
   hardware.graphics = {
@@ -382,8 +403,14 @@ in
     bibata-cursors # cursor theme for the SDDM greeter (matches the home-session cursor)
     spotify
     p7zip
+    powertop # battery diagnosis: `sudo powertop` shows the top power drains + tunables
+    iw       # inspect/adjust Wi-Fi power saving (`iw dev wlp0s20f3 get power_save`)
     (python3.withPackages (python-pkgs: with python-pkgs; [  ]))
   ];
+
+  # Tiny power win: the NMI watchdog runs a periodic timer on every CPU; off saves a
+  # little idle power (kernel debugging feature you don't need day-to-day).
+  boot.kernel.sysctl."kernel.nmi_watchdog" = 0;
   
   services.flatpak.enable = true;
   systemd.services.flatpak-repo = {
