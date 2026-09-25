@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 # Media transport controls for the eww music popup. Args: toggle | next | prev.
-# These are instant playerctl calls that DON'T close the popup or rebuild widgets,
-# so (unlike wifi-connect) they finish before eww could tear down the onclick child —
-# no setsid needed.
-command -v playerctl >/dev/null 2>&1 || exit 0
+# Delegates to media-ctl.sh so the popup buttons, the keyboard media keys and headset
+# buttons (AirPods etc.) all pick the SAME player (the one actually playing).
+d="$(dirname "$0")"
 case "${1:-}" in
-  toggle) playerctl play-pause ;;
-  next)   playerctl next ;;
-  prev)   playerctl previous ;;
-esac >/dev/null 2>&1 || true
+  toggle) "$d/media-ctl.sh" play-pause ;;
+  next)   "$d/media-ctl.sh" next ;;
+  prev)   "$d/media-ctl.sh" previous ;;
+esac

@@ -4,6 +4,7 @@
 # load http art URLs directly). Requires playerctl (added to home.nix); until that's
 # installed it emits a stable "no player" state so the widget just stays hidden.
 set -uo pipefail
+d="$(dirname "$0")"
 cache="${XDG_CACHE_HOME:-$HOME/.cache}/eww"; mkdir -p "$cache"
 artfile="$cache/art"; lasturl=""
 
@@ -26,14 +27,16 @@ fetch_art() { # $1=artUrl -> prints a local path eww can load ("" if none)
 }
 
 emit() {
-  playerctl status >/dev/null 2>&1 || { echo "$none"; return; }
+  # Show the player the controls act on (see media-target.sh), not just the first one.
+  local t P=(); t="$("$d/media-target.sh")"; [ -n "$t" ] && P=(-p "$t")
+  playerctl "${P[@]}" status >/dev/null 2>&1 || { echo "$none"; return; }
   local status title artist album arturl art len
-  status=$(playerctl status 2>/dev/null)
-  title=$(playerctl metadata xesam:title 2>/dev/null)
-  artist=$(playerctl metadata xesam:artist 2>/dev/null)
-  album=$(playerctl metadata xesam:album 2>/dev/null)
-  arturl=$(playerctl metadata mpris:artUrl 2>/dev/null)
-  len=$(playerctl metadata mpris:length 2>/dev/null); len=$(( ${len:-0} / 1000000 ))  # µs → s
+  status=$(playerctl "${P[@]}" status 2>/dev/null)
+  title=$(playerctl "${P[@]}" metadata xesam:title 2>/dev/null)
+  artist=$(playerctl "${P[@]}" metadata xesam:artist 2>/dev/null)
+  album=$(playerctl "${P[@]}" metadata xesam:album 2>/dev/null)
+  arturl=$(playerctl "${P[@]}" metadata mpris:artUrl 2>/dev/null)
+  len=$(playerctl "${P[@]}" metadata mpris:length 2>/dev/null); len=$(( ${len:-0} / 1000000 ))  # µs → s
   local lenstr; lenstr="$(printf '%d:%02d' "$((len/60))" "$((len%60))")"
   art=$(fetch_art "$arturl")
   jq -cn --arg s "$status" --arg t "$title" --arg a "$artist" --arg al "$album" \
@@ -44,7 +47,7 @@ emit() {
 emit
 # Follow status + metadata changes (NOT position — that would churn every second;
 # the seek position is polled separately in mpris-pos.sh).
-playerctl -F -f '{{status}}={{title}}' metadata 2>/dev/null | while IFS= read -r _; do
+playerctl -a -F -f '{{playerName}}{{status}}={{title}}' metadata 2>/dev/null | while IFS= read -r _; do
   emit
 done
 echo "$none"   # follow ended (last player quit) → settle; eww respawns us

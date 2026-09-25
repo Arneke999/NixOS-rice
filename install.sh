@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# NixOS + Niri rice — installer / bootstrap.
+# NixOS + Hyprland rice — installer / bootstrap.
 #
 # Makes a fresh clone usable under ANY username by wiring up the one thing that
 # can't parametrise itself:

@@ -26,7 +26,7 @@
     brightnessctl
     swaynotificationcenter   # swaync — animated notifications + notification center
     hyprlock                 # the Lain lockscreen (CRT shader, pink input)
-    hypridle                 # idle -> lock (drives lock via logind for Niri)
+    hypridle                 # idle -> screen off after 6 min; locks before suspend (via logind)
     wlogout                  # power menu (Super+L): lock/logout/suspend/reboot/shutdown
     neovim                   # Neovim tooling (installed via Nix, NOT mason — mason binaries break on NixOS):
     lua-language-server   # lua_ls
