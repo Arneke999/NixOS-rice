@@ -1,4 +1,4 @@
-{ config, pkgs, username, ... }:
+{ config, lib, pkgs, username, ... }:
 
 {
   home.username = username;
@@ -17,6 +17,7 @@
     jq
     socat                    # eww workspace widget: Hyprland socket2 event stream
     playerctl                # eww now-playing widget: MPRIS metadata + transport controls
+    pulseaudio               # client tools only (pactl) — the volume OSD listens to `pactl subscribe`; PipeWire still does the audio
     # (night light uses Hyprland's decoration:screen_shader — dotfiles/hypr/nightlight.frag —
     #  not gammastep, since this VM's virtio-gpu has no gamma-control support.)
     grim                     # screenshots (Print binds)
@@ -154,4 +155,20 @@
   # plugins into ~/.local/share/nvim, and lazy-lock.json lands back in the repo.
   xdg.configFile."nvim".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/nvim";
+
+  # RStudio: start R in ~ instead of RStudio's read-only app folder in the Nix store.
+  # With empty prefs, R's working dir was .../rstudio/resources/app — so .Rhistory
+  # failed to save and read.csv("data.csv") looked in the wrong place. RStudio owns
+  # this JSON (it writes your prefs into it), so we MERGE one key rather than symlink
+  # the file; `//=` only fills it when unset, so a directory you pick in Tools >
+  # Global Options still wins.
+  home.activation.rstudioWorkingDir = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    prefs="${config.xdg.configHome}/rstudio/rstudio-prefs.json"
+    if [[ ! -v DRY_RUN ]]; then
+      mkdir -p "$(dirname "$prefs")"
+      [ -s "$prefs" ] || echo '{}' > "$prefs"
+      ${pkgs.jq}/bin/jq '.initial_working_directory //= "~"' "$prefs" > "$prefs.tmp" \
+        && mv "$prefs.tmp" "$prefs"
+    fi
+  '';
 }

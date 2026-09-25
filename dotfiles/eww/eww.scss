@@ -239,3 +239,21 @@ scale slider {
   color: #c8c8ce;
 }
 .popup-manage:hover { background-color: #22222a; }
+
+// ── on-screen display (volume / brightness) ─────────────────────
+// Same near-black pill as the bar; a pink progress bar instead of a slider (no knob,
+// it's read-only). Fades in/out via Hyprland's global `fade` animation for layers.
+.osd { padding: 12px 20px; }
+.osd-icon { color: #f5c2e7; font-size: 20px; }
+.osd-val  { color: #c8c8ce; font-size: 13px; min-width: 44px; }
+.osd-bar trough {
+  background-color: #2a2a30;
+  border-radius: 12px;
+  min-height: 6px;
+  min-width: 170px;
+}
+.osd-bar progress {
+  background-color: #f5c2e7;
+  border-radius: 12px;
+  min-height: 6px;
+}

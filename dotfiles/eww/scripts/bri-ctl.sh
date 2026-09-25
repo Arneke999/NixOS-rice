@@ -10,3 +10,4 @@ case "$dir" in
   set)  [ -n "$val" ] && brightnessctl set "${val}%" ;;
 esac >/dev/null 2>&1
 eww update brightness="$("$(dirname "$0")/brightness.sh")" >/dev/null 2>&1 || true
+"$(dirname "$0")/osd.sh" bri   # on-screen display (skipped while the brightness popup is open)

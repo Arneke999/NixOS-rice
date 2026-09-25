@@ -64,6 +64,16 @@ in
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  # Housekeeping: nothing was ever cleaned up (38 generations, 90 GB store, /boot
+  # filling with old kernels). Weekly GC of generations older than 14 days keeps two
+  # weeks of rollbacks; auto-optimise hard-links identical files in the store.
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 14d";
+  };
+  nix.settings.auto-optimise-store = true;
+
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = false;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -72,6 +82,7 @@ in
     efiSupport = true;
     device = "nodev";
     useOSProber = true;
+    configurationLimit = 15;   # boot menu + kernels copied to /boot: newest 15 only
     };
 
   # Boot splash: the Lain theme (near-black + pink wired motif). Texture is kept
@@ -96,12 +107,12 @@ in
   # Quiet the kernel/initrd log spam so the splash reads clean.
   boot.consoleLogLevel = 0;
   boot.initrd.verbose = false;
-  # i915.enable_psr=0 disables Panel Self-Refresh. The kernel logs "Selective fetch
-  # area calculation failed in pipe A" — a PSR2 selective-fetch bug on this Arrow Lake
-  # eDP panel — which reads as stuttery, ~30fps animations. Disabling PSR trades a
-  # little idle battery for smooth motion. (Middle ground if power matters later:
-  # i915.enable_psr=1, i.e. PSR1 only, no PSR2 selective fetch.)
-  boot.kernelParams = [ "quiet" "splash" "loglevel=3" "rd.udev.log_level=3" "i915.enable_psr=0" ];
+  # Panel Self-Refresh: i915.enable_psr=1 = PSR1 only. PSR2's "selective fetch" is buggy
+  # on this Arrow Lake eDP panel (kernel logs "Selective fetch area calculation failed
+  # in pipe A") and made animations stutter at ~30fps, so PSR used to be fully OFF
+  # (=0). PSR1 has no selective fetch, so it should stay smooth while getting back most
+  # of the idle-display battery saving. If the stutter returns, set this back to 0.
+  boot.kernelParams = [ "quiet" "splash" "loglevel=3" "rd.udev.log_level=3" "i915.enable_psr=1" ];
 
   networking.hostName = "nixos"; # Define your hostname.
 
@@ -176,11 +187,13 @@ in
   #   useXkbConfig = true; # use xkb.options in tty.
   # };
   
-  #Enable clipboard sharing in virt-manager
-  services.spice-vdagentd.enable = true;
-
-  #Enable SSH
-  services.openssh.enable = true;
+  # SSH server OFF. It was a leftover from when this ran in a VM, and it listened on all
+  # networks with password login — on campusroam anyone on the KU Leuven network could
+  # try to brute-force the login password. Nothing here needs it. To SSH *into* this
+  # laptop again, re-enable with key-only login:
+  #   services.openssh = { enable = true; settings.PasswordAuthentication = false;
+  #                        settings.KbdInteractiveAuthentication = false; };
+  services.openssh.enable = false;
 
   # Hyprland session (dynamic tiling). Built into nixpkgs — also pulls in the
   # Hyprland xdg-desktop-portal, so screenshare/file-picker work.
@@ -189,14 +202,6 @@ in
     xwayland.enable = true;
     };
 
-  # VM workaround: this machine's virtio-gpu rejects atomic modesets for any mode
-  # other than the current one ("atomic drm request: failed to commit: Invalid
-  # argument"), so Hyprland can't set 1920x1200. AQ_NO_ATOMIC makes aquamarine use
-  # the legacy DRM interface, which the virtual GPU accepts. NixOS-machine-only —
-  # it's not synced to the Arch laptop, where atomic modeset is fine on real hw.
-  # Set here for manual/shell launches; also inlined in the greetd command below,
-  # since a greetd-spawned session doesn't source the shell profile.
-  # environment.sessionVariables.AQ_NO_ATOMIC = "1";
 
   # Boot login: SDDM (Qt6) with the sddm-astronaut theme, themed to the rice via the
   # `sddm-astronaut` binding at the top of this file. Replaced ReGreet — libadwaita
@@ -419,13 +424,20 @@ in
   boot.kernel.sysctl."kernel.nmi_watchdog" = 0;
   
   services.flatpak.enable = true;
+  # Add the Flathub remote once. It used to FAIL on every boot: it runs before Wi-Fi
+  # is up, so the download couldn't resolve. Waiting for network-online would instead
+  # make boot wait on Wi-Fi (multi-user.target waits for units it pulls in), so just
+  # skip the network entirely when the remote already exists. On a fresh install it's
+  # added during `nixos-rebuild switch`, when the network is up.
   systemd.services.flatpak-repo = {
-  wantedBy = [ "multi-user.target" ];
-  path = [ pkgs.flatpak ];
-  script = ''
-    flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-  '';
-};
+    wantedBy = [ "multi-user.target" ];
+    path = [ pkgs.flatpak ];
+    serviceConfig.Type = "oneshot";
+    script = ''
+      flatpak remotes --system --columns=name | grep -qx flathub && exit 0
+      flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+    '';
+  };
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;

@@ -34,7 +34,7 @@ lock screen, bar, terminal and editor, is configured in this repo.
 | Compositor | Hyprland (dwindle tiling) |
 | Bar & popups | eww (yuck + scss + bash scripts) |
 | Launcher / pickers | fuzzel |
-| Notifications | swaync (notification centre + DND) |
+| Notifications / OSD | swaync (notification centre + DND) · eww volume/brightness OSD |
 | Lock / idle | hyprlock (CRT shader) + hypridle |
 | Power menu | wlogout |
 | Wallpaper | awww (with transitions) |
@@ -45,7 +45,7 @@ lock screen, bar, terminal and editor, is configured in this repo.
 | Audio | PipeWire + WirePlumber (`wpctl`) |
 | Network | NetworkManager (incl. declarative WPA2‑Enterprise for campusroam) |
 | Bluetooth | BlueZ (`bluetoothctl`) |
-| Power | TLP + thermald, charge limit 75–80 % |
+| Power | TLP + thermald, charge limit 75–80 %, PSR1, low‑battery warnings + safe suspend at 5 % |
 | Secrets | sops‑nix (age) |
 | Theme | Catppuccin Mocha · Papirus‑Dark icons · Bibata cursor · adw‑gtk3 |
 
@@ -121,6 +121,18 @@ A few patterns repeat throughout the scripts:
   scans would stall and Wi‑Fi connects would die halfway.
 - **Popup reflow.** eww sizes a window once, when it opens. When a list grows (for example
   after a Bluetooth scan), `scripts/reflow.sh` closes and reopens the popup so it fits.
+
+### Background helpers (autostarted)
+Small long‑running scripts started by Hyprland's `exec-once`. Each one replaces any
+older copy of itself on startup, so they never stack up across logins.
+
+| Helper | What it does |
+|---|---|
+| `scripts/conn-notify.sh` | Toast when Wi‑Fi or a Bluetooth device connects |
+| `scripts/battery-notify.sh` | Warns at 20 % and 10 % (critical), and at 5 % gives a 60 s countdown then suspends. Plugging in cancels it; waking up unplugged gives you 5 minutes to save |
+| `eww/scripts/osd-volume-watch.sh` | Shows the volume OSD for *any* volume change: keys, bar scroll, AirPods, apps. Event‑driven through `pactl subscribe` |
+| `scripts/float-ws-listen.sh` | Floats new windows on workspaces in free‑float mode |
+| `playerctld` | Remembers the most recently active media player |
 
 ### Theme
 The colours are fixed Catppuccin Mocha values, repeated inline in each tool's config:
@@ -206,8 +218,9 @@ All screenshots go to `~/Pictures/Screenshots` **and** the clipboard.
 | `Alt + Print` | Active window |
 
 ### Hardware keys & headset buttons
-Volume up/down/mute, mic mute and brightness up/down all work, and update the bar
-instantly. **Media keys** (play/pause, next, previous, stop, seek) work from the keyboard,
+Volume up/down/mute, mic mute and brightness up/down all work. They update the bar
+instantly and show an **on‑screen display** (bottom centre, disappears after a moment).
+The volume OSD also appears when the volume changes from AirPods or an app. **Media keys** (play/pause, next, previous, stop, seek) work from the keyboard,
 from wired‑headset remotes, and from **Bluetooth headset buttons**. BlueZ turns a headset's
 AVRCP presses into media keys through a virtual `<device> (AVRCP)` keyboard.
 
@@ -267,7 +280,7 @@ the tray, CPU/RAM, toggles, weather and date.
 | Volume | slider + **output device picker** | middle‑click mute · scroll to adjust |
 | Wi‑Fi | network list, rescan, on/off, password prompt | |
 | Bluetooth | paired devices + auto‑scan, pair new devices | middle‑click on/off |
-| ☕ Caffeine | keep screen awake (pauses hypridle) | |
+| ☕ Caffeine | keep screen awake (holds an idle inhibitor; closing the lid still suspends *and locks*) | |
 | 🔔 DND | silence notifications | |
 | 🌙 Night light | warm screen tint (Hyprland shader) | |
 | Weather | 3‑day forecast popup | auto location via wttr.in |
@@ -285,6 +298,7 @@ Clicking anywhere outside a popup closes it.
 sudo nixos-rebuild switch --flake ~/nix-config#nixos
 sudo nixos-rebuild test   --flake ~/nix-config#nixos   # apply without adding a boot entry
 sudo nixos-rebuild switch --rollback                   # undo the last switch
+sudo nix-collect-garbage --delete-older-than 14d       # clean up now (runs weekly automatically)
 
 # Update packages (updates flake.lock), then rebuild
 nix flake update                     # everything
@@ -321,6 +335,10 @@ bluetoothctl info <MAC> | grep -E 'Paired|Bonded|Trusted|Connected'
 - At activation, secrets are decrypted to `/run/secrets/…`. A sops template turns them into an
   env file that NetworkManager's `ensureProfiles` reads (`$CAMPUSROAM_ID`, `$CAMPUSROAM_PW`).
 
+**SSH server is off.** It was a leftover from when this ran in a VM, and it accepted
+password logins on every network (including campusroam). See `configuration.nix` for the
+key‑only snippet if you ever need to SSH *into* this laptop.
+
 To add a secret, declare `sops.secrets.<name> = { };` in Nix, run `sops secrets/secrets.yaml`,
 add a `<name>: value` line, and rebuild.
 
@@ -342,6 +360,17 @@ Things that cost real debugging time, written down so they don't have to be redi
   pairable on. Check with `bluetoothctl info` that it says **`Bonded: yes`**.
 - **AirPods battery isn't readable:** Apple reports it over a proprietary protocol that BlueZ
   can't decode. The bar shows battery % for Bluetooth devices that *do* report it.
+- **Panel Self‑Refresh:** `i915.enable_psr=1` (PSR1 only). PSR2's "selective fetch" is buggy on
+  this panel and made animations stutter, so PSR used to be fully off (`=0`), at a battery
+  cost. If the stutter ever comes back, set it back to `0`. Note that
+  `/sys/module/i915/parameters/enable_psr` is root‑readable only, so a non‑root read failing
+  does *not* mean the parameter is missing.
+- **Caffeine** holds a systemd idle inhibitor (`systemd-inhibit --what=idle`); it does *not*
+  stop `hypridle`. That matters because `hypridle` is also what locks the screen before
+  suspend. An older version killed it, so closing the lid while caffeinated slept unlocked.
+- **Housekeeping:** weekly garbage collection keeps 14 days of generations, the store is
+  auto‑optimised, and GRUB/`/boot` keep the newest 15 entries. Without this, `/boot` (1 GB)
+  slowly fills with old kernels until a rebuild fails.
 - **Night light** uses Hyprland's `decoration:screen_shader` rather than gammastep, because
   gamma control isn't available on every GPU/output. The shader works everywhere.
 - **RStudio** pulls in an end‑of‑life Electron that nixpkgs flags as insecure. It's allowed

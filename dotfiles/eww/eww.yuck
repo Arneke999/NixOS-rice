@@ -21,6 +21,7 @@
 (defvar  wifi_nets "[]")         ;; nearby Wi-Fi networks for the picker (refreshed on popup open)
 (defvar  wifi_scanning false)    ;; true while a rescan runs (button shows a spinner)
 (defvar  audio_sinks "[]")       ;; audio output devices for the volume popup (refreshed on open)
+(defvar  osd_kind "vol")         ;; which value the on-screen display shows: "vol" | "bri"
 (deflisten workspaces :initial "[]" "~/nix-config/dotfiles/eww/scripts/workspaces.sh")
 ;; id of a workspace that just got a window while unfocused → flash its dot ("" = none)
 (deflisten ws_blink :initial "" "~/nix-config/dotfiles/eww/scripts/ws-blink.sh")
@@ -278,6 +279,18 @@
       (button :class "music-btn big" :onclick "~/nix-config/dotfiles/eww/scripts/mpris-ctl.sh toggle" (label :text {mpris.status == "Playing" ? "󰏤" : "󰐊"}))
       (button :class "music-btn"     :onclick "~/nix-config/dotfiles/eww/scripts/mpris-ctl.sh next"   (label :text "󰒭")))))
 
+;; On-screen display for volume/brightness (scripts/osd.sh shows it, auto-hides it).
+;; Reads the same `volume` / `brightness` vars as the bar, so it can never disagree.
+(defwidget osd-w []
+  (box :class "pill osd" :space-evenly false :spacing 14
+    (label :class "osd-icon"
+           :text {osd_kind == "bri" ? "󰃟" :
+                  volume.muted ? "󰝟" : volume.value < 34 ? "󰕿" : volume.value < 67 ? "󰖀" : "󰕾"})
+    (progress :class "osd-bar" :hexpand true :valign "center"
+              :value {osd_kind == "bri" ? brightness.value : (volume.muted ? 0 : volume.value)})
+    (label :class "osd-val"
+           :text {osd_kind == "bri" ? "${brightness.value}%" : volume.muted ? "muted" : "${volume.value}%"})))
+
 ;; ── bar ──────────────────────────────────────────────────────────
 (defwindow bar
   :monitor 0
@@ -330,6 +343,11 @@
   :monitor 0 :stacking "overlay"
   :geometry (geometry :y "6px" :x "8px" :anchor "top right" :width "300px")
   (pop-weather-w))
+
+(defwindow osd
+  :monitor 0 :stacking "overlay" :focusable false
+  :geometry (geometry :anchor "bottom center" :y "90px" :width "300px")
+  (osd-w))
 
 (defwindow pop-music
   :monitor 0 :stacking "overlay"
