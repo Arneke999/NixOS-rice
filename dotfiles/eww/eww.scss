@@ -230,6 +230,7 @@ scale slider {
 .bt-dev:hover { background-color: #1a1a1f; }
 .bt-dev.connected { color: #f5c2e7; }
 .wifi-lock { color: #6a6a70; font-size: 11px; }   // lock glyph / "pair" hint on a row
+.bt-bat   { color: #a6adc8; font-size: 11px; }   // device battery % in the BT popup
 
 .popup-manage {
   padding: 6px;

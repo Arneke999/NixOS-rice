@@ -16,6 +16,7 @@ if timeout 2 bluetoothctl show 2>/dev/null | grep -q "Powered: yes"; then
              bt_devices='[]' bt_scan='[]' bt_scanning=false >/dev/null 2>&1 || true
   timeout 5 bluetoothctl power off >/dev/null 2>&1 || true
   eww update bluetooth="$("$d/bluetooth.sh")" >/dev/null 2>&1 || true
+  setsid -f "$d/reflow.sh" pop-bt >/dev/null 2>&1   # shrink popup (lists cleared)
 else
   # → ON: optimistic UI, power on, then reconnect + scan in the background.
   eww update bluetooth='{"present":true,"powered":true,"connected":false}' >/dev/null 2>&1 || true
@@ -32,9 +33,11 @@ else
       [ -n "$mac" ] && timeout 8 bluetoothctl connect "$mac" >/dev/null 2>&1 &
     done < <(timeout 3 bluetoothctl devices Paired 2>/dev/null)
     eww update bt_devices="$("$d/bt-list.sh")" >/dev/null 2>&1 || true
+    "$d/reflow.sh" pop-bt   # show paired devices at the right size
     # Auto-scan so nearby/new devices appear without hitting the Scan button.
     eww update bt_scanning=true >/dev/null 2>&1 || true
     eww update bt_scan="$("$d/bt-scan.sh")" bt_devices="$("$d/bt-list.sh")" \
                bluetooth="$("$d/bluetooth.sh")" >/dev/null 2>&1 || true
+    "$d/reflow.sh" pop-bt   # grow to fit scan results
   ' _ "$d" >/dev/null 2>&1 || true
 fi

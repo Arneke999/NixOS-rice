@@ -18,17 +18,40 @@ fi
 
 note() { command -v notify-send >/dev/null 2>&1 && notify-send -a "Bluetooth" "$@"; }
 
-# Hold the adapter in discovery so the target stays in BlueZ's cache while we pair.
-bluetoothctl --timeout 30 scan on >/dev/null 2>&1 &
-scanpid=$!
-sleep 2   # give it a moment to (re)discover the device before pairing
+# Pairable ON is what makes the pairing a *bond* (link key written to disk). With it
+# off, BlueZ does a non-bonding pairing: works until the next reboot, then fails with
+# br-connection-key-missing. That was the "trusted but never reconnects" bug.
+timeout 5 bluetoothctl pairable on >/dev/null 2>&1
 
-timeout 20 bluetoothctl pair "$mac"  >/dev/null 2>&1
+# A known-but-unbonded record (stale key) makes pairing fail — start clean.
+if timeout 2 bluetoothctl info "$mac" 2>/dev/null | grep -q "Bonded: no" \
+   && timeout 2 bluetoothctl info "$mac" 2>/dev/null | grep -q "Paired: yes"; then
+  timeout 5 bluetoothctl remove "$mac" >/dev/null 2>&1
+fi
+
+# Hold the adapter in discovery so the target stays in BlueZ's cache while we pair,
+# and wait (up to 12s) until it's actually visible rather than a fixed sleep.
+bluetoothctl --timeout 40 scan on >/dev/null 2>&1 &
+scanpid=$!
+for _ in $(seq 12); do
+  timeout 2 bluetoothctl devices 2>/dev/null | grep -qi "$mac" && break; sleep 1
+done
+
+timeout 25 bluetoothctl pair "$mac"  >/dev/null 2>&1
 timeout 5  bluetoothctl trust "$mac" >/dev/null 2>&1   # trust → auto-reconnect next time
-ok=1; timeout 15 bluetoothctl connect "$mac" >/dev/null 2>&1 || ok=0
+timeout 15 bluetoothctl connect "$mac" >/dev/null 2>&1
 
 kill "$scanpid" 2>/dev/null
-name="$(timeout 2 bluetoothctl info "$mac" 2>/dev/null | sed -n 's/^\tName: //p')"
-if [ "$ok" = 1 ]; then note "󰂱  Connected" "${name:-$mac}"; else note "Pairing/connect failed" "${name:-$mac}"; fi
+info="$(timeout 2 bluetoothctl info "$mac" 2>/dev/null)"
+name="$(sed -n 's/^\tName: //p' <<<"$info")"
+# Verify the thing that actually matters: a stored bond.
+if grep -q "Bonded: yes" <<<"$info"; then
+  note "󰂱  Paired & saved" "${name:-$mac} will reconnect automatically"
+elif grep -q "Connected: yes" <<<"$info"; then
+  note "Connected, but NOT saved" "${name:-$mac}: put it in pairing mode and pair again"
+else
+  note "Pairing failed" "${name:-$mac}: put it in pairing mode (hold the case button) and retry"
+fi
 
 eww update bt_devices="$("$d/bt-list.sh")" bt_scan='[]' bluetooth="$("$d/bluetooth.sh")" >/dev/null 2>&1 || true
+setsid -f "$d/reflow.sh" pop-bt >/dev/null 2>&1   # re-fit popup: device moved from nearby → paired

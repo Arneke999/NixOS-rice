@@ -60,6 +60,7 @@
     age
     httpx
     protonplus
+    rstudio
   ];
 
   fonts.fontconfig.enable = true;

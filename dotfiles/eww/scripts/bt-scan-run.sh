@@ -12,4 +12,5 @@ setsid -f bash -c '
   trap "eww update bt_scanning=false >/dev/null 2>&1 || true" EXIT
   eww update bt_scanning=true >/dev/null 2>&1 || true
   eww update bt_scan="$("$d/bt-scan.sh")" >/dev/null 2>&1 || true
+  setsid -f "$d/reflow.sh" pop-bt >/dev/null 2>&1   # grow the popup to fit the new rows
 ' _ "$d" >/dev/null 2>&1 || true

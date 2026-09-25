@@ -214,7 +214,9 @@
                 :onclick "~/nix-config/dotfiles/eww/scripts/bt-connect.sh ${d.mac}"
           (box :space-evenly false :spacing 8
             (label :text {d.connected ? "󰂱" : "󰂯"})
-            (label :hexpand true :halign "start" :limit-width 20 :text {d.name})))))
+            (label :hexpand true :halign "start" :limit-width 18 :text {d.name})
+            ;; battery % — only for devices that report one (AirPods usually don't)
+            (label :class "bt-bat" :visible {d.battery >= 0} :text "󰥉 ${d.battery}%")))))
     (label :class "popup-sub" :halign "start"
            :visible {bluetooth.powered && (arraylength(bt_devices) == 0)}
            :text "no paired devices")

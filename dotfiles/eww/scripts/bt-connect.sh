@@ -8,3 +8,4 @@ else
 fi
 d="$(dirname "$0")"
 eww update bt_devices="$("$d/bt-list.sh")" bluetooth="$("$d/bluetooth.sh")" >/dev/null 2>&1 || true
+setsid -f "$d/reflow.sh" pop-bt >/dev/null 2>&1   # re-fit popup (detached: closing it would kill us)

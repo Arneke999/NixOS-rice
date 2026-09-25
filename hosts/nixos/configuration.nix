@@ -306,6 +306,11 @@ in
   #Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
+  # RStudio (for stats class) bundles an end-of-life Electron that nixpkgs flags as
+  # insecure; RStudio itself runs fine, so explicitly allow just that package. Bump
+  # this version string if a future nixpkgs pulls a newer (still-flagged) Electron.
+  nixpkgs.config.permittedInsecurePackages = [ "electron-41.10.6" ];
+
   #nix claude code overlay
   nixpkgs.overlays = [ inputs.nix-claude-code.overlays.default ];
 
@@ -318,6 +323,7 @@ in
   hardware.bluetooth.settings = {
     General = {
       FastConnectable = true;            # link back up quickly when a known device reappears
+      AlwaysPairable = true;             # pairings always BOND (store the key) — without it they vanish on reboot
       JustWorksRepairing = "always";     # headsets (incl. AirPods) re-pair without prompts
       Experimental = true;               # exposes battery % for BLE devices (e.g. AirPods)
     };
