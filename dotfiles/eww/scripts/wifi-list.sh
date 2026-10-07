@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Nearby Wi-Fi networks as JSON for the popup picker: [{ssid,signal,secure,active}].
+# Nearby Wi-Fi networks as JSON for the popup picker: [{ssid,signal,kind,secure,arg,active}].
 # Deduped by SSID (strongest kept), active network first then by signal desc. Empty
 # [] when the radio is off. Reads NetworkManager's cached scan (fast) — the popup's
 # rescan button (wifi-rescan.sh) is what forces a fresh scan.
@@ -20,4 +20,11 @@ nmcli -t -f IN-USE,SIGNAL,SECURITY,SSID dev wifi list 2>/dev/null \
     END { for (s in sigmax) printf "%d\t%d\t%s\t%s\n", (act[s]?1:0), sigmax[s], secof[s], s }' \
 | sort -t$'\t' -k1,1nr -k2,2nr \
 | jq -R -s 'split("\n") | map(select(length>0) | split("\t"))
-            | map({ active:(.[0]=="1"), signal:(.[1]|tonumber), secure:(.[2]!=""), ssid:.[3] })'
+            | map({ active:(.[0]=="1"), signal:(.[1]|tonumber), ssid:.[3],
+                    kind:(if (.[2]|test("802\\.1X")) then "eap"
+                          elif (.[2]=="" or .[2]=="OWE") then "open" else "psk" end) })
+            | map(. + { secure:(.kind!="open"), arg:(.ssid|@sh) })'
+# kind drives wifi-connect.sh: psk = password prompt, eap = enterprise (username +
+# certificate → nmtui), open = no password (incl. OWE). secure = the lock glyph.
+# arg = the SSID shell-quoted (jq @sh) for the row's onclick, so a name with an
+# apostrophe in it (a phone hotspot like "Anna's iPhone") can't break the command.

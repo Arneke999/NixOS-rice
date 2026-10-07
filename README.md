@@ -278,7 +278,7 @@ the tray, CPU/RAM, toggles, weather and date.
 | CPU / RAM rings | — | hover for % |
 | Brightness | slider popup | scroll to adjust |
 | Volume | slider + **output device picker** | middle‑click mute · scroll to adjust |
-| Wi‑Fi | network list, rescan, on/off, password prompt | |
+| Wi‑Fi | network list, rescan, on/off; click a network to join | wrong password → asks again · ⚙ opens nmtui (hidden / enterprise networks) · login pages open in the browser |
 | Bluetooth | paired devices + auto‑scan, pair new devices | middle‑click on/off |
 | ☕ Caffeine | keep screen awake (holds an idle inhibitor; closing the lid still suspends *and locks*) | |
 | 🔔 DND | silence notifications | |
@@ -354,6 +354,12 @@ Things that cost real debugging time, written down so they don't have to be redi
   `Reason 23 (IEEE8021X_FAILED)`, which looks exactly like a wrong password. Use
   `ca-cert = "/etc/ssl/certs/ca-certificates.crt"` with `domain-suffix-match = "kuleuven.be"`
   instead. Both `campusroam` and `campusroam-2.4` are generated from one helper.
+- **Joining Wi‑Fi from the bar:** a wrong password makes NetworkManager report
+  `Secrets were required, but not provided` (the journal shows `4-Way Handshake failed`).
+  `wifi-connect.sh` treats that as "wrong password" and asks again in place. It never deletes
+  a *saved* profile: an older version did, which also wiped the sops‑managed campusroam
+  profile whenever it was simply out of range. Enterprise networks (username + certificate)
+  go to nmtui, because one password box can't configure them safely.
 - **Bluetooth pairing must *bond*:** if the adapter isn't pairable while you pair, BlueZ does a
   non‑bonding pairing. It works until the next reboot, then fails with
   `br-connection-key-missing`. The fix is `AlwaysPairable = true` plus `bt-pair.sh` turning
@@ -375,9 +381,19 @@ Things that cost real debugging time, written down so they don't have to be redi
   gamma control isn't available on every GPU/output. The shader works everywhere.
 - **RStudio** pulls in an end‑of‑life Electron that nixpkgs flags as insecure. It's allowed
   explicitly in `nixpkgs.config.permittedInsecurePackages`. Bump that version string if a future
-  update complains about a different one. For R packages, use
-  `rstudioWrapper.override { packages = with rPackages; [ … ]; }` instead of
-  `install.packages()`.
+  update complains about a different one. RStudio is also **pinned** to an older nixpkgs
+  (`nixpkgs-rstudio` in `flake.nix`) because newer unstable fails to link it against an
+  updated Boost; drop the pin once `nix build nixpkgs#rstudio` works again. While pinned, its
+  wrapper points it at the pinned nixpkgs' Mesa (the system Mesa needs a newer glibc than the
+  old Electron has, which silently forces software rendering). **R packages** go in the
+  `rPackages` list in `home/home.nix`, not `install.packages()`. RStudio and terminal
+  `R`/`Rscript` both use that list, plus R's 15 recommended packages. The wrapper also passes
+  `$HOME` as a launch argument: nixpkgs' launcher hands RStudio its own app folder as an
+  argument, which RStudio takes as "the folder you opened", so R used to start inside the
+  read‑only Nix store (`.Rhistory` failed, `file.choose()` and relative paths started there).
+- **File pickers** (RStudio's `file.choose()`, browser uploads) come from
+  `xdg-desktop-portal-gtk`. `xdg.portal.config` must name an *installed* backend (`gtk`);
+  naming `gnome` without the GNOME portal installed leaves it to an undocumented fallback.
 - **eww's SCSS compiler (grass)** rejects comma‑combined keyframes like `0%,100% { }`. Give each
   stop its own block.
 - **`nix flake update` can briefly break the build** when nixpkgs‑unstable is mid‑transition

@@ -179,19 +179,24 @@
       (button :class "popup-manage" :tooltip "Rescan"
               :onclick "~/nix-config/dotfiles/eww/scripts/wifi-rescan.sh"
         (label :text {wifi_scanning ? "󱥸" : "󰑐"}))
+      ;; Escape hatch for what a click can't do: hidden networks, enterprise logins.
+      (button :class "popup-manage" :tooltip "Hidden / enterprise network (nmtui)"
+              :onclick "~/nix-config/dotfiles/eww/scripts/nmtui-float.sh"
+        (label :text "󰒓"))
       (button :class {wifi.enabled ? "toggle on" : "toggle off"}
               :onclick "~/nix-config/dotfiles/eww/scripts/wifi-toggle.sh"
         (label :text {wifi.enabled ? "on" : "off"})))
     (label :class "popup-sub" :halign "start" :wrap true
            :text {!wifi.enabled ? "radio off" :
                   wifi.ssid != "" ? "${wifi.ssid}  ·  ${wifi.signal}%" : "not connected"})
-    ;; Scrollable list of nearby networks — click to (re)connect; secured ones prompt
-    ;; for a password in a themed fuzzel. Reuses the .bt-dev row styling.
+    ;; Scrollable list of nearby networks: click to (re)connect; password networks prompt
+    ;; in a themed fuzzel (wrong password → asks again). n.arg is the SSID pre-quoted for
+    ;; the shell (see wifi-list.sh). Reuses the .bt-dev row styling.
     (scroll :height 220 :vscroll true :visible {wifi.enabled && arraylength(wifi_nets) > 0}
       (box :orientation "v" :space-evenly false :spacing 3
         (for n in wifi_nets
           (button :class {n.active ? "bt-dev connected" : "bt-dev"}
-                  :onclick "~/nix-config/dotfiles/eww/scripts/wifi-connect.sh '${n.ssid}' ${n.secure}"
+                  :onclick "~/nix-config/dotfiles/eww/scripts/wifi-connect.sh ${n.arg} ${n.kind}"
             (box :space-evenly false :spacing 8
               (label :text {n.signal >= 80 ? "󰤨" : n.signal >= 55 ? "󰤥" :
                             n.signal >= 30 ? "󰤢" : n.signal >= 5 ? "󰤟" : "󰤯"})

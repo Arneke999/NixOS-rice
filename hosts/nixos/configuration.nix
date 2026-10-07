@@ -401,7 +401,10 @@ in
 
   # programs.firefox.enable = true;
   
-  xdg.portal.config.common."org.freedesktop.impl.portal.FileChooser" = "gnome";
+  # File-picker dialogs (Brave uploads, RStudio's file.choose(), Flatpaks) come from
+  # xdg-desktop-portal-gtk. Must name an INSTALLED backend: this said "gnome", which
+  # isn't installed, so pickers only worked via an undocumented fallback.
+  xdg.portal.config.common."org.freedesktop.impl.portal.FileChooser" = "gtk";
 
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
@@ -416,7 +419,10 @@ in
     p7zip
     powertop # battery diagnosis: `sudo powertop` shows the top power drains + tunables
     iw       # inspect/adjust Wi-Fi power saving (`iw dev wlp0s20f3 get power_save`)
-    (python3.withPackages (python-pkgs: with python-pkgs; [  ]))
+    (python3.withPackages (python-pkgs: with python-pkgs; [ yfinance ]))
+    qemu-user
+    pkgsCross.riscv64.buildPackages.gcc
+    pkgsCross.riscv32.buildPackages.gcc
   ];
 
   # Tiny power win: the NMI watchdog runs a periodic timer on every CPU; off saves a

@@ -1,10 +1,63 @@
-{ config, lib, pkgs, username, ... }:
+{ config, lib, pkgs, inputs, username, ... }:
 
+let
+  # RStudio from the pinned nixpkgs (see nixpkgs-rstudio in flake.nix for why).
+  # Same nixpkgs config as the system, so the Electron permit still applies.
+  pkgsRstudio = import inputs.nixpkgs-rstudio {
+    inherit (pkgs.stdenv.hostPlatform) system;
+    inherit (pkgs) config;
+  };
+
+  # R packages for RStudio AND terminal R (one list → same packages in both). Install
+  # them here, not with install.packages(): compiled packages need system libraries
+  # NixOS doesn't expose to R, and ones that do build link against store paths the
+  # weekly garbage collection can delete. R's 15 "recommended" packages (MASS,
+  # lattice, Matrix, survival, …) are added by the wrappers automatically.
+  # Names: https://search.nixos.org/packages?query=rPackages
+  rPackages = with pkgsRstudio.rPackages; [
+    tidyverse   # ggplot2, dplyr, tidyr, readr, readxl, haven (SPSS/Stata), broom, …
+    rmarkdown   # R Markdown / knit to HTML/Word/PDF
+    knitr
+    lessR       # simplified stats/plots for class: BarChart(), Histogram(), ttest(), reg(), …
+    car
+  ];
+
+  # The pinned RStudio's Electron is linked against the older glibc, so it can't load
+  # the system's (newer) Mesa graphics driver ("GLIBC_2.43 not found") and falls back
+  # to slow software rendering. Point it at the Mesa from its own nixpkgs instead.
+  # Remove together with the pin.
+  rstudio = (pkgsRstudio.rstudioWrapper.override { packages = rPackages; }).overrideAttrs (old: {
+    buildCommand = old.buildCommand + ''
+      wrapProgram $out/bin/rstudio \
+        --set GBM_BACKENDS_PATH ${pkgsRstudio.mesa}/lib/gbm \
+        --set LIBGL_DRIVERS_PATH ${pkgsRstudio.mesa}/lib/dri \
+        --set __EGL_VENDOR_LIBRARY_FILENAMES ${pkgsRstudio.mesa}/share/glvnd/egl_vendor.d/50_mesa.json
+
+      # Start R in ~. RStudio treats every existing path among its launch arguments as
+      # "what you opened", and the LAST one becomes R's working directory. nixpkgs'
+      # launcher passes RStudio's own read-only app folder as an argument, so R started
+      # inside the Nix store (.Rhistory/.RData couldn't save; relative paths and
+      # file.choose() started there; the initial_working_directory pref is overridden).
+      # Passing $HOME after it fixes that. A file you open (rstudio script.R) still
+      # comes later and wins.
+      mv $out/bin/rstudio $out/bin/.rstudio-home
+      cat > $out/bin/rstudio <<EOF
+      #!${pkgsRstudio.runtimeShell}
+      exec $out/bin/.rstudio-home "\$HOME" "\$@"
+      EOF
+      chmod +x $out/bin/rstudio
+    '';
+  });
+
+  # `R` / `Rscript` in the terminal: same R version and packages as RStudio.
+  R = pkgsRstudio.rWrapper.override { packages = rPackages; };
+in
 {
   home.username = username;
   home.homeDirectory = "/home/${username}";
   home.stateVersion = "26.05";   # <-- match system.stateVersion in configuration.nix
   home.packages = with pkgs; [
+    github-cli
     kitty
     awww
     brave
@@ -61,7 +114,8 @@
     age
     httpx
     protonplus
-    rstudio
+    rstudio   # pinned + R packages + graphics fix, see the let-block above
+    R         # terminal R/Rscript with the same packages
   ];
 
   fonts.fontconfig.enable = true;
