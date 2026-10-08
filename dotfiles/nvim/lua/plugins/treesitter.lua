@@ -11,6 +11,7 @@ return {
     ensure_installed = {
       "bash", "c", "lua", "luadoc", "markdown", "markdown_inline",
       "nix", "python", "vim", "vimdoc", "json", "yaml", "toml", "kdl",
+      "asm", -- RISC-V / GNU as assembly
     },
     auto_install = true,
     highlight = { enable = true },

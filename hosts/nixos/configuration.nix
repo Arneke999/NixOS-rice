@@ -299,6 +299,14 @@ in
   programs.zsh.autosuggestions.enable = true;
   programs.zsh.syntaxHighlighting.enable = true;
 
+  # nix-ld: run prebuilt Linux binaries that expect a normal distro, like the Python
+  # builds and wheels uv downloads. It's a NixOS MODULE, not a package: it replaces the
+  # stub loader at /lib64/ld-linux-x86-64.so.2 and serves libraries from
+  # NIX_LD_LIBRARY_PATH. If a binary still says "libfoo.so: cannot open shared object
+  # file", add the package providing it to the list below and rebuild.
+  programs.nix-ld.enable = true;
+  # programs.nix-ld.libraries = with pkgs; [ ];   # extra libs on top of the defaults
+
   # Keep the sudo password cached for 15 min (default is 5) so you re-enter less.
   security.sudo.extraConfig = ''
     Defaults timestamp_timeout=15
@@ -419,7 +427,7 @@ in
     p7zip
     powertop # battery diagnosis: `sudo powertop` shows the top power drains + tunables
     iw       # inspect/adjust Wi-Fi power saving (`iw dev wlp0s20f3 get power_save`)
-    (python3.withPackages (python-pkgs: with python-pkgs; [ yfinance ]))
+    (python3.withPackages (python-pkgs: with python-pkgs; [ yfinance python-dotenv ]))
     qemu-user
     pkgsCross.riscv64.buildPackages.gcc
     pkgsCross.riscv32.buildPackages.gcc

@@ -11,6 +11,7 @@ return {
       { "<leader>r", group = "Rename/Refactor" },
       { "<leader>c", group = "Code" },
       { "<leader>d", group = "Document/Diagnostic" },
+      { "<leader>x", group = "Execute (RISC-V: run/debug/dump)" },
     },
   },
 }

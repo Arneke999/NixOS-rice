@@ -51,6 +51,34 @@ let
 
   # `R` / `Rscript` in the terminal: same R version and packages as RStudio.
   R = pkgsRstudio.rWrapper.override { packages = rPackages; };
+
+  # RISC-V (computerarchitectuur): the GNU toolchain for RV32 + RV64 and QEMU to run
+  # the programs on this x86 laptop.
+  riscvBinutils64 = pkgs.pkgsCross.riscv64.buildPackages.binutils;
+
+  # `rv run|debug|dump prog.s`, see dotfiles/scripts/rv.sh. Carries its own toolchain
+  # on PATH, so it works from any terminal, Neovim or Codium.
+  rv = pkgs.writeShellApplication {
+    name = "rv";
+    runtimeInputs = with pkgs; [
+      qemu-user
+      gdb
+      pkgsCross.riscv32.buildPackages.gcc
+      pkgsCross.riscv64.buildPackages.gcc
+    ];
+    text = builtins.readFile ../dotfiles/scripts/rv.sh;
+  };
+
+  # RARS, the RISC-V simulator (Java GUI). On Hyprland Java needs
+  # _JAVA_AWT_WM_NONREPARENTING=1, or its panes collapse (the editor squashed into a
+  # thin strip on the left). Note: `rars prog.s` runs in the terminal and exits;
+  # plain `rars` opens the GUI.
+  rars = pkgs.symlinkJoin {
+    name = "rars";
+    paths = [ pkgs.rars ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = "wrapProgram $out/bin/rars --set _JAVA_AWT_WM_NONREPARENTING 1";
+  };
 in
 {
   home.username = username;
@@ -91,6 +119,12 @@ in
     fd                    # telescope find-files
     gcc                   # compile treesitter parsers + fzf-native
     gnumake               # build telescope-fzf-native + LuaSnip jsregexp
+    asm-lsp               # assembly LSP (RISC-V): instruction docs on K, completion, assembler errors
+    # RISC-V assembly (see the let-block): rv = build/run/debug, gdb = debugger (nixpkgs
+    # builds it for every architecture), rars = visual simulator (registers, memory, step).
+    rv
+    gdb
+    rars
     # Shell (zsh) + interactive tooling. Note: zsh-autosuggestions and
     # zsh-syntax-highlighting are provided by programs.zsh.* in configuration.nix
     # (loaded via /etc/zshrc), so they're not listed here.
@@ -116,6 +150,7 @@ in
     protonplus
     rstudio   # pinned + R packages + graphics fix, see the let-block above
     R         # terminal R/Rscript with the same packages
+    uv                    # Python projects/venvs; its downloaded Pythons run via nix-ld (configuration.nix)
   ];
 
   fonts.fontconfig.enable = true;
@@ -188,6 +223,39 @@ in
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/gtk/gtk.css";
   xdg.configFile."gtk-4.0/gtk.css".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/gtk/gtk.css";
+
+  # uv: always use uv's own downloaded Pythons. Those run through nix-ld, so pip wheels
+  # with compiled parts (numpy, pandas, …) find libstdc++/zlib. The Nix python3 on PATH
+  # doesn't go through nix-ld, and uv would otherwise prefer it.
+  # asm-lsp: every .s file is RISC-V (GNU as syntax) unless a project ships its own
+  # .asm-lsp.toml. Errors come from the real RISC-V assembler; the rv64 one also accepts
+  # RV32 code, so it covers both. -o /dev/null so checking never writes a.out files.
+  # RARS ships no .desktop file; this makes it show up in the app launcher.
+  xdg.desktopEntries.rars = {
+    name = "RARS";
+    genericName = "RISC-V simulator";
+    comment = "Assemble, run and step through RISC-V programs";
+    exec = "rars";
+    icon = "applications-engineering";
+    categories = [ "Development" "Education" ];
+  };
+
+  xdg.configFile."asm-lsp/.asm-lsp.toml".text = ''
+    [default_config]
+    version = "0.10.1"
+    assembler = "gas"
+    instruction_set = "riscv"
+
+    [default_config.opts]
+    compiler = "${riscvBinutils64}/bin/riscv64-unknown-linux-gnu-as"
+    compile_flags_txt = ["-o", "/dev/null"]
+    diagnostics = true
+    default_diagnostics = false
+  '';
+
+  xdg.configFile."uv/uv.toml".text = ''
+    python-preference = "only-managed"
+  '';
 
   xdg.configFile."fastfetch/config.jsonc".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/fastfetch/config.jsonc";

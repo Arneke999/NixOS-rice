@@ -42,6 +42,7 @@ lock screen, bar, terminal and editor, is configured in this repo.
 | Shell | zsh + starship, fzf, eza, bat |
 | Files | yazi |
 | Editor | Neovim (lazy.nvim, LSP, Telescope, Treesitter, inline diagnostics) |
+| Coursework | RISC‑V: GNU toolchain + QEMU via `rv`, gdb, asm‑lsp, RARS · R/RStudio (pinned, packages via Nix) |
 | Audio | PipeWire + WirePlumber (`wpctl`) |
 | Network | NetworkManager (incl. declarative WPA2‑Enterprise for campusroam) |
 | Bluetooth | BlueZ (`bluetoothctl`) |
@@ -256,8 +257,27 @@ you don't end up pausing the wrong one. The bar's now‑playing widget follows t
 | `]h` / `[h` | Next / previous git hunk |
 | `<leader>hs` / `hr` / `hp` / `hb` | Stage / reset / preview hunk, blame line |
 | `Ctrl + h j k l` | Move between splits |
+| `<leader>xr` / `xd` / `xo` | RISC-V (`.s` files): run / debug in gdb / disassemble |
+| `<leader>x6` | RISC-V: switch this buffer between RV32 and RV64 |
 
-LSPs: `lua_ls`, `nixd`, `basedpyright` and `ruff`, all installed through Nix (no mason).
+LSPs: `lua_ls`, `nixd`, `basedpyright`, `ruff` and `asm_lsp` (RISC-V assembly), all installed
+through Nix (no mason).
+
+### RISC-V assembly
+`rv` (`dotfiles/scripts/rv.sh`) builds with the GNU toolchain and runs in QEMU, so no RISC‑V
+hardware is needed. RV32 is the default; add `-64` before the command for RV64.
+
+| Command | What it does |
+|---|---|
+| `rv run prog.s` | Assemble, link, run; prints the exit code |
+| `rv debug prog.s` | Run paused under gdb with registers + source (`si` step, `c` continue, `q` quit) |
+| `rv dump prog.s` | Machine code (hex) next to each line |
+| `rars` | Visual simulator (registers/memory, step back). Uses RARS's own `ecall` numbers |
+
+Programs start at `_start:` (exit with `a7=93`) or `main:` (C library, `printf`). Under QEMU
+the `ecall`s are Linux ones (`a7=64` write, `93` exit). The asm-lsp config lives in
+`home.nix` (RISC‑V, errors from the real assembler). In Codium, **Ctrl+Shift+B** runs the open
+file (user tasks in `~/.config/VSCodium/User/tasks.json`).
 
 ### Shell aliases
 `ls`, `ll`, `la` and `lt` are all `eza` with icons (`lt` shows a tree).
@@ -391,6 +411,11 @@ Things that cost real debugging time, written down so they don't have to be redi
   `$HOME` as a launch argument: nixpkgs' launcher hands RStudio its own app folder as an
   argument, which RStudio takes as "the folder you opened", so R used to start inside the
   read‑only Nix store (`.Rhistory` failed, `file.choose()` and relative paths started there).
+- **Prebuilt binaries / uv:** `nix-ld` only works as `programs.nix-ld.enable` in
+  `configuration.nix`; installing the `nix-ld` *package* does nothing. uv is set to
+  `python-preference = "only-managed"` because its downloaded Pythons run through nix-ld (so
+  numpy/pandas wheels find `libstdc++`), while the Nix `python3` doesn't. A binary that
+  complains about a missing `.so` needs that library in `programs.nix-ld.libraries`.
 - **File pickers** (RStudio's `file.choose()`, browser uploads) come from
   `xdg-desktop-portal-gtk`. `xdg.portal.config` must name an *installed* backend (`gtk`);
   naming `gnome` without the GNOME portal installed leaves it to an undocumented fallback.
