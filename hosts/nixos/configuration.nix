@@ -106,7 +106,6 @@ in
   };
   # Quiet the kernel/initrd log spam so the splash reads clean.
   boot.consoleLogLevel = 0;
-  boot.initrd.verbose = false;
   # Panel Self-Refresh: i915.enable_psr=1 = PSR1 only. PSR2's "selective fetch" is buggy
   # on this Arrow Lake eDP panel (kernel logs "Selective fetch area calculation failed
   # in pipe A") and made animations stutter at ~30fps, so PSR used to be fully OFF
@@ -451,7 +450,7 @@ in
       flatpak remotes --system --columns=name | grep -qx flathub && exit 0
       flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
     '';
-  };
+  };   
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;

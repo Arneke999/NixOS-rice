@@ -56,6 +56,33 @@ let
   # the programs on this x86 laptop.
   riscvBinutils64 = pkgs.pkgsCross.riscv64.buildPackages.binutils;
 
+  # Debian/Ubuntu names for the same RV64 toolchain: riscv64-linux-gnu-gcc, -as, -ld,
+  # -objdump, … Course instructions and Makefiles use these; nixpkgs calls them
+  # riscv64-unknown-linux-gnu-*. Real executables, so `make` finds them too.
+  # The compilers also get the STATIC glibc for `-static` links: nixpkgs leaves it out,
+  # so `-static` (common in course commands, so qemu-riscv64 ./prog needs no setup)
+  # failed with "cannot find -lc". Added ONLY when -static is given: ld takes the first
+  # libc it finds, so on every link it picked libc.a even for normal (dynamic) builds,
+  # which then segfaulted.
+  riscvDebianNames =
+    let
+      gcc = pkgs.pkgsCross.riscv64.buildPackages.gcc;
+      staticLibc = pkgs.pkgsCross.riscv64.glibc.static;
+      compiler = tool: pkgs.writeShellScriptBin "riscv64-linux-gnu-${tool}" ''
+        static=
+        for a in "$@"; do case $a in -static|-static-pie) static=1 ;; esac; done
+        exec ${gcc}/bin/riscv64-unknown-linux-gnu-${tool} ''${static:+-L${staticLibc}/lib} "$@"
+      '';
+      compilers = map compiler [ "gcc" "g++" "cc" "c++" ];
+    in
+    pkgs.runCommand "riscv64-linux-gnu-names" { } ''
+      mkdir -p $out/bin
+      for t in ${gcc}/bin/riscv64-unknown-linux-gnu-*; do
+        ln -s "$t" "$out/bin/riscv64-linux-gnu-''${t##*/riscv64-unknown-linux-gnu-}"
+      done
+      for c in ${lib.concatStringsSep " " compilers}; do ln -sf "$c"/bin/* $out/bin/; done
+    '';
+
   # `rv run|debug|dump prog.s`, see dotfiles/scripts/rv.sh. Carries its own toolchain
   # on PATH, so it works from any terminal, Neovim or Codium.
   rv = pkgs.writeShellApplication {
@@ -123,6 +150,7 @@ in
     # RISC-V assembly (see the let-block): rv = build/run/debug, gdb = debugger (nixpkgs
     # builds it for every architecture), rars = visual simulator (registers, memory, step).
     rv
+    riscvDebianNames      # riscv64-linux-gnu-gcc & co (Debian-style names, -static works)
     gdb
     rars
     # Shell (zsh) + interactive tooling. Note: zsh-autosuggestions and
@@ -151,6 +179,10 @@ in
     rstudio   # pinned + R packages + graphics fix, see the let-block above
     R         # terminal R/Rscript with the same packages
     uv                    # Python projects/venvs; its downloaded Pythons run via nix-ld (configuration.nix)
+    burpsuite
+    bitwarden-desktop
+    metasploit
+    dirbuster
   ];
 
   fonts.fontconfig.enable = true;

@@ -51,7 +51,8 @@ lock screen, bar, terminal and editor, is configured in this repo.
 | Theme | Catppuccin Mocha · Papirus‑Dark icons · Bibata cursor · adw‑gtk3 |
 
 Flake inputs: `nixpkgs` (unstable), `home-manager`, `sops-nix`, `nix-claude-code`
-(overlay for an up‑to‑date Claude Code) and `brave-previews` (Brave Origin Nightly).
+(overlay for an up‑to‑date Claude Code) and `nixpkgs-rstudio` (RStudio pinned to a nixpkgs
+where it still builds).
 
 ---
 
@@ -278,6 +279,11 @@ Programs start at `_start:` (exit with `a7=93`) or `main:` (C library, `printf`)
 the `ecall`s are Linux ones (`a7=64` write, `93` exit). The asm-lsp config lives in
 `home.nix` (RISC‑V, errors from the real assembler). In Codium, **Ctrl+Shift+B** runs the open
 file (user tasks in `~/.config/VSCodium/User/tasks.json`).
+
+The toolchain also answers to its **Debian/Ubuntu names** (`riscv64-linux-gnu-gcc`, `-as`,
+`-ld`, `-objdump`, …), which course instructions and Makefiles use. nixpkgs' own names are
+`riscv64-unknown-linux-gnu-*`. With the Debian names, `-static` works too (they add the
+static glibc only for `-static` links), so `qemu-riscv64 ./prog` runs without a sysroot.
 
 ### Shell aliases
 `ls`, `ll`, `la` and `lt` are all `eza` with icons (`lt` shows a tree).

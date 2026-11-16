@@ -4,8 +4,10 @@
 		nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nix-claude-code.url = "github:ryoppippi/nix-claude-code";
     sops-nix.url = "github:Mic92/sops-nix";
-    brave-previews.url = "github:jdcodes28/brave-browser-flake";
-    brave-previews.inputs.nixpkgs.follows = "nixpkgs";
+    # Use OUR nixpkgs instead of each locking its own copy: otherwise `nix flake update`
+    # resolves and downloads nixpkgs three times (more GitHub API calls, more disk).
+    nix-claude-code.inputs.nixpkgs.follows = "nixpkgs";
+    sops-nix.inputs.nixpkgs.follows = "nixpkgs";
     # RStudio only, pinned to the 2026-09-23 nixpkgs (same RStudio 2026.09.0+174).
     # Newer unstable builds it against an updated Boost and the link fails
     # (undefined reference to boost::urls::grammar::detail::condition_cat), and
@@ -18,7 +20,7 @@
 			};
 		};
 
-	outputs = { self, nixpkgs, home-manager, sops-nix, brave-previews, ... }@inputs:
+	outputs = { self, nixpkgs, home-manager, sops-nix, ... }@inputs:
 	let
 		# ── Single source of truth ─────────────────────────────────────────
 		# Change this one line (or set it via install.sh) to rename the user.
@@ -38,15 +40,6 @@
 					home-manager.extraSpecialArgs = { inherit inputs username; };
 					home-manager.users.${username} = import ./home/home.nix;
 				}
-        brave-previews.nixosModules.default
-        {
-          programs.brave-origin-nightly = {
-            enable = true;
-            extensions = [
-              "cjpalhdlnbpafiamejdnhcphjbkeiagm" # uBlock Origin
-            ];
-          };
-        }
       ];
 		};
 	};
