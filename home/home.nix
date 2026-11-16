@@ -183,6 +183,10 @@ in
     bitwarden-desktop
     metasploit
     dirbuster
+    rockyou
+    seclists
+    nmap
+    ffuf
   ];
 
   fonts.fontconfig.enable = true;
