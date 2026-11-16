@@ -432,6 +432,12 @@ in
     pkgsCross.riscv32.buildPackages.gcc
   ];
 
+  # rockyou/seclists (home.nix) install to share/wordlists, which profiles don't link
+  # by default, so they never showed up anywhere. Link it, and expose it at the
+  # Kali-style /usr/share/wordlists path that tools and writeups assume.
+  environment.pathsToLink = [ "/share/wordlists" ];
+  systemd.tmpfiles.rules = [ "L+ /usr/share/wordlists - - - - /etc/profiles/per-user/${username}/share/wordlists" ];
+
   # Tiny power win: the NMI watchdog runs a periodic timer on every CPU; off saves a
   # little idle power (kernel debugging feature you don't need day-to-day).
   boot.kernel.sysctl."kernel.nmi_watchdog" = 0;
