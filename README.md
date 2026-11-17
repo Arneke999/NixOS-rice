@@ -68,7 +68,7 @@ nix-config/
 │   └── hardware-configuration.nix
 ├── home/home.nix              # user packages + symlinks from dotfiles/ into ~/.config
 ├── dotfiles/                  # the actual rice — edited live, see "How it works"
-│   ├── hypr/                  # hyprland.conf, hyprlock.conf/.frag, hypridle.conf, nightlight.frag
+│   ├── hypr/                  # hyprland.lua, hyprlock.conf/.frag, hypridle.conf, nightlight.frag
 │   ├── eww/                   # eww.yuck (layout), eww.scss (style), scripts/ (data + actions)
 │   ├── scripts/               # wallpaper, screenshots, float mode, connection toasts, GTK theme
 │   ├── kitty/ nvim/ zsh/ starship/ bat/ yazi/ fuzzel/ swaync/ wlogout/ gtk/ fastfetch/
@@ -97,7 +97,7 @@ copy in the Nix store. Edit the file, reload the program, and you're done:
 
 | You changed… | To apply |
 |---|---|
-| `dotfiles/hypr/hyprland.conf` | saves auto‑reload (or `hyprctl reload`) |
+| `dotfiles/hypr/hyprland.lua` | saves auto‑reload (or `hyprctl reload`) |
 | `dotfiles/eww/eww.yuck` / `eww.scss` | `eww reload` |
 | `dotfiles/eww/scripts/*` | nothing, scripts run fresh on every click/poll |
 | `dotfiles/kitty/kitty.conf` | `Ctrl+Shift+F5` in kitty |

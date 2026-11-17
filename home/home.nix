@@ -183,10 +183,17 @@ in
     bitwarden-desktop
     metasploit
     dirbuster
+    # dirbuster ships its lists in share/dirbuster; relink them under share/wordlists
+    # so they land at /usr/share/wordlists/dirbuster like on Kali.
+    (runCommand "dirbuster-wordlists" { } ''
+      mkdir -p $out/share/wordlists
+      ln -s ${dirbuster}/share/dirbuster $out/share/wordlists/dirbuster
+    '')
     rockyou
     seclists
     nmap
     ffuf
+    gobuster
   ];
 
   fonts.fontconfig.enable = true;
@@ -197,7 +204,7 @@ in
   # `Requisite=graphical-session.target`, so without this the portal never starts
   # ("NameHasNoOwner: Could not activate remote peer org.freedesktop.portal.Desktop")
   # and anything portal-backed breaks: Flatpak webviews (Sober's Roblox captcha
-  # hangs on its proxy lookup), file pickers, screenshare. hyprland.conf starts
+  # hangs on its proxy lookup), file pickers, screenshare. hyprland.lua starts
   # this target on launch, right after dbus-update-activation-environment.
   systemd.user.targets.hyprland-session = {
     Unit = {
@@ -215,11 +222,12 @@ in
   };
 
   # Out-of-store symlinks: live repo files (edited in place, hot-reloaded).
-  # hyprland.conf carries the Catppuccin colours inline. Hyprland's search path is
+  # hyprland.lua carries the Catppuccin colours inline. Hyprland's search path is
   # ~/.config/hypr, so this drops in alongside hyprlock/hypridle and is a straight
-  # copy to Arch.
-  xdg.configFile."hypr/hyprland.conf".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/hypr/hyprland.conf";
+  # copy to Arch. (Hyprland >=0.57 reads ONLY hyprland.lua — the hyprlang
+  # hyprland.conf format is gone; a missing .lua makes it autogenerate a default.)
+  xdg.configFile."hypr/hyprland.lua".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/hypr/hyprland.lua";
 
   xdg.configFile."kitty/kitty.conf".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/dotfiles/kitty/kitty.conf";

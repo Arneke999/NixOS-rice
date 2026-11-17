@@ -17,7 +17,7 @@ flip() {
   local want="$1" a
   for a in $(hyprctl -j clients | jq -r --argjson w "$ws" --argjson f "$want" \
               '.[] | select(.workspace.id==$w and .floating==$f) | .address'); do
-    hyprctl dispatch togglefloating "address:$a" >/dev/null
+    hyprctl dispatch "hl.dsp.window.float({ action = 'toggle', window = 'address:$a' })" >/dev/null
   done
 }
 

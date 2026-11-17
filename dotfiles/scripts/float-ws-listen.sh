@@ -32,7 +32,7 @@ socat -U - "UNIX-CONNECT:$sock" | while IFS= read -r line; do
       n="$(jq --arg w "$wsname" '[ .[] | select((.workspace.id|tostring)==$w and .floating==true) ] | length' <<<"$clients")"
       monid="$(jq -r --arg a "0x$addr" '.[] | select(.address==$a) | .monitor' <<<"$clients")"
 
-      hyprctl dispatch togglefloating "address:0x$addr" >/dev/null 2>&1
+      hyprctl dispatch "hl.dsp.window.float({ action = 'on', window = 'address:0x$addr' })" >/dev/null 2>&1
 
       # Size + centred-then-cascaded top-left, from THIS window's monitor. Using the
       # monitor's reserved area (the bar) makes the base match centerwindow exactly.
@@ -44,7 +44,8 @@ socat -U - "UNIX-CONNECT:$sock" | while IFS= read -r line; do
       ux=$(( mx + rl )); uy=$(( my + rt )); uw=$(( mw - rl - rr )); uh=$(( mh - rt - rb ))
       off=$(( (n % 6) * 30 ))                       # wrap after 6 so it stays on-screen
       x=$(( ux + (uw - w) / 2 + off )); y=$(( uy + (uh - h) / 2 + off ))
-      hyprctl --batch "dispatch resizewindowpixel exact $w $h,address:0x$addr ; dispatch movewindowpixel exact $x $y,address:0x$addr" >/dev/null 2>&1
+      hyprctl eval "hl.dispatch(hl.dsp.window.resize({ x = $w, y = $h, window = 'address:0x$addr' }))
+                    hl.dispatch(hl.dsp.window.move({ x = $x, y = $y, window = 'address:0x$addr' }))" >/dev/null 2>&1
       ;;
   esac
 done
